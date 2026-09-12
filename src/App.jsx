@@ -3,9 +3,11 @@ import { useSubmissions } from './hooks/useSubmissions';
 import { Header } from './components/Header';
 import { StatsBar } from './components/StatsBar';
 import { SeatMatrix } from './components/SeatMatrix';
+import { NumberOrderView } from './components/NumberOrderView';
 import { UnsubmittedSidebar } from './components/UnsubmittedSidebar';
 import { NewAssignmentModal } from './components/NewAssignmentModal';
 import { StudentEditModal } from './components/StudentEditModal';
+import { LayoutGrid, ListOrdered } from 'lucide-react';
 import './App.css';
 
 export function App() {
@@ -17,6 +19,8 @@ export function App() {
     setCurrentAssignmentId,
     viewMode,
     setViewMode,
+    displayMode,
+    setDisplayMode,
     toggleStatus,
     setStudentStatus,
     batchSetStatus,
@@ -48,6 +52,7 @@ export function App() {
         onToggleViewMode={handleToggleViewMode}
         onOpenStudentEdit={() => setIsStudentEditOpen(true)}
         onBatchSetStatus={batchSetStatus}
+        displayMode={displayMode}
       />
 
       <main className="app-main-content">
@@ -55,17 +60,31 @@ export function App() {
         <div className="content-container">
           <StatsBar stats={stats} />
 
-          {/* 3. 2열 워크스페이스: 좌측 4*6 좌석 행렬 + 우측 실시간 미제출 명단 */}
+          {/* 3. 2열 워크스페이스: 좌측 학생 뷰(좌석배치/번호순) + 우측 실시간 미제출 명단 */}
           <div className="workspace-grid">
             <section className="workspace-matrix-section">
               <div className="matrix-card">
-                <div className="matrix-header-bar">
-                  <div>
-                    <h2 className="matrix-title">학급 좌석 배치도 (4분단 × 6열)</h2>
-                    <p className="matrix-subtitle">
-                      학생 카드를 클릭하여 <strong>[제출 완료]</strong> 상태를 즉시 토글하세요.
-                    </p>
+                {/* 뷰 전환 탭: [좌석 배치표 (1~6분단)] vs [번호 순 정렬 (1열 남 / 2열 여)] */}
+                <div className="view-mode-selector-bar">
+                  <div className="view-mode-tabs">
+                    <button
+                      type="button"
+                      className={`view-mode-tab-btn ${displayMode === 'SEAT' ? 'active' : ''}`}
+                      onClick={() => setDisplayMode('SEAT')}
+                    >
+                      <LayoutGrid size={16} />
+                      <span>좌석 배치표 (행: 1~6분단 · 열: 1~4번)</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-mode-tab-btn ${displayMode === 'NUMBER' ? 'active' : ''}`}
+                      onClick={() => setDisplayMode('NUMBER')}
+                    >
+                      <ListOrdered size={16} />
+                      <span>번호 순 (1열 남자 · 2열 여자)</span>
+                    </button>
                   </div>
+
                   <div className="matrix-status-legend">
                     <span className="legend-item">
                       <span className="legend-dot dot-submitted"></span> 제출 완료
@@ -79,14 +98,36 @@ export function App() {
                   </div>
                 </div>
 
-                <SeatMatrix
-                  students={students}
-                  getStudentStatus={getStudentStatus}
-                  onToggle={toggleStatus}
-                  onSetStatus={setStudentStatus}
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
-                />
+                {/* 안내 문구 */}
+                <div className="view-mode-description">
+                  {displayMode === 'SEAT' ? (
+                    <p className="matrix-subtitle">
+                      행은 <strong>1분단~6분단</strong>, 열은 <strong>1번~4번 자리</strong>입니다. 학생 카드를 클릭하여 <strong>[제출 완료]</strong> 상태를 즉시 토글하세요.
+                    </p>
+                  ) : (
+                    <p className="matrix-subtitle">
+                      출석 번호 순으로 정렬되어 있습니다. <strong>1열은 남학생</strong>, <strong>2열은 여학생</strong> 명단입니다.
+                    </p>
+                  )}
+                </div>
+
+                {/* 4. 조건부 렌더링: 좌석 배치표 vs 번호 순 정렬 */}
+                {displayMode === 'SEAT' ? (
+                  <SeatMatrix
+                    students={students}
+                    getStudentStatus={getStudentStatus}
+                    onToggle={toggleStatus}
+                    onSetStatus={setStudentStatus}
+                    viewMode={viewMode}
+                  />
+                ) : (
+                  <NumberOrderView
+                    students={students}
+                    getStudentStatus={getStudentStatus}
+                    onToggle={toggleStatus}
+                    onSetStatus={setStudentStatus}
+                  />
+                )}
               </div>
             </section>
 

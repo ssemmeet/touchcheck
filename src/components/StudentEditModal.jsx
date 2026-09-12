@@ -134,7 +134,7 @@ export function StudentEditModal({ isOpen, onClose, currentStudents, onSave, onR
                 <tbody>
                   {students.map((s) => (
                     <tr key={s.id}>
-                      <td className="text-muted text-sm">{s.col}분단 {s.row}열</td>
+                      <td className="text-muted text-sm">{s.row}분단 {s.col}번</td>
                       <td className="font-bold">{s.number}번</td>
                       <td>
                         <input

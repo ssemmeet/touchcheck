@@ -25,6 +25,10 @@ export function useSubmissions() {
   // 'STUDENT': 칠판을 바라보는 시점 (1분단이 좌측 or 4분단이 우측)
   const [viewMode, setViewMode] = useState('TEACHER');
 
+  // 'SEAT': 좌석 배치표 (행으로 1~6분단, 열로 1~4번)
+  // 'NUMBER': 번호 순 (1열 남자, 2열 여자)
+  const [displayMode, setDisplayMode] = useState('SEAT');
+
   // 로컬스토리지에서 초기 데이터 불러오기
   useEffect(() => {
     try {
@@ -36,6 +40,7 @@ export function useSubmissions() {
         if (parsed.currentAssignmentId) setCurrentAssignmentId(parsed.currentAssignmentId);
         if (parsed.submissions) setSubmissions(parsed.submissions);
         if (parsed.viewMode) setViewMode(parsed.viewMode);
+        if (parsed.displayMode) setDisplayMode(parsed.displayMode);
       }
     } catch (e) {
       console.error('LocalStorage 로드 실패, 기본값을 사용합니다.', e);
@@ -54,12 +59,13 @@ export function useSubmissions() {
         currentAssignmentId,
         submissions,
         viewMode,
+        displayMode,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (e) {
       console.error('LocalStorage 저장 실패', e);
     }
-  }, [students, assignments, currentAssignmentId, submissions, viewMode, isLoaded]);
+  }, [students, assignments, currentAssignmentId, submissions, viewMode, displayMode, isLoaded]);
 
   // 현재 과제의 제출 맵
   const currentSubmissions = useMemo(() => {
@@ -222,6 +228,8 @@ export function useSubmissions() {
     setCurrentAssignmentId,
     viewMode,
     setViewMode,
+    displayMode,
+    setDisplayMode,
     toggleStatus,
     setStudentStatus,
     batchSetStatus,

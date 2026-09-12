@@ -20,6 +20,7 @@ export function Header({
   onToggleViewMode,
   onOpenStudentEdit,
   onBatchSetStatus,
+  displayMode,
 }) {
   const [showBatchMenu, setShowBatchMenu] = useState(false);
 
@@ -81,18 +82,20 @@ export function Header({
 
         {/* 우측 도구 모음 */}
         <div className="header-actions">
-          {/* 시점 전환 버튼 */}
-          <button
-            type="button"
-            className="action-btn btn-toggle-view"
-            onClick={onToggleViewMode}
-            title={viewMode === 'TEACHER' ? '학생 시점(칠판 바라보는 기준)으로 전환' : '교탁 시점(앞에서 내려다보는 기준)으로 전환'}
-          >
-            <ArrowLeftRight size={15} />
-            <span>
-              {viewMode === 'TEACHER' ? '교탁 시점' : '학생 시점'}
-            </span>
-          </button>
+          {/* 시점 전환 버튼 (좌석 배치표 모드에서만 유효) */}
+          {displayMode === 'SEAT' && (
+            <button
+              type="button"
+              className="action-btn btn-toggle-view"
+              onClick={onToggleViewMode}
+              title={viewMode === 'TEACHER' ? '학생 시점(칠판 바라보는 기준)으로 전환' : '교탁 시점(앞에서 내려다보는 기준)으로 전환'}
+            >
+              <ArrowLeftRight size={15} />
+              <span>
+                {viewMode === 'TEACHER' ? '교탁 시점' : '학생 시점'}
+              </span>
+            </button>
+          )}
 
           {/* 일괄 체크 드롭다운 */}
           <div className="dropdown-wrapper">

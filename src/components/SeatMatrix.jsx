@@ -1,19 +1,16 @@
 import React from 'react';
-import { ArrowLeftRight, Eye, Monitor } from 'lucide-react';
+import { Monitor } from 'lucide-react';
 import { StudentSeatCard } from './StudentSeatCard';
 
-export function SeatMatrix({ students, getStudentStatus, onToggle, onSetStatus, viewMode, setViewMode }) {
-  // 행렬 구성: 6행 (1~6), 4열 (1~4)
-  // viewMode에 따른 정렬:
-  // - 'TEACHER': 교탁에서 바라봄 (앞자리가 위쪽, 교탁 기준 좌우)
-  // - 'STUDENT': 칠판을 바라봄 (학생 기준 1분단이 왼쪽)
-  
+export function SeatMatrix({ students, getStudentStatus, onToggle, onSetStatus, viewMode }) {
+  // 행: 1~6분단 (row 1 ~ 6)
+  // 열: 1~4번 (col 1 ~ 4)
   const rows = [1, 2, 3, 4, 5, 6];
   const cols = viewMode === 'TEACHER' ? [4, 3, 2, 1] : [1, 2, 3, 4];
 
-  // 학생 찾기 (row, col)
-  const getStudentAt = (r, c) => {
-    return students.find(s => s.row === r && s.col === c);
+  // 학생 찾기 (row: 분단 번호, col: 분단 내 번호)
+  const getStudentAt = (bundun, seatNum) => {
+    return students.find(s => s.row === bundun && s.col === seatNum);
   };
 
   return (
@@ -28,26 +25,29 @@ export function SeatMatrix({ students, getStudentStatus, onToggle, onSetStatus, 
         <div className="podium-line"></div>
       </div>
 
-      {/* 분단 헤더 */}
+      {/* 열 헤더 (1번, 2번, 3번, 4번) */}
       <div className="matrix-column-headers">
+        <div className="row-label-placeholder"></div>
         {cols.map((colNum) => (
           <div key={`header-${colNum}`} className="column-header-cell">
-            <span className="buntan-badge">{colNum}분단</span>
+            <span className="col-num-badge">{colNum}번 자리</span>
           </div>
         ))}
       </div>
 
-      {/* 4*6 좌석 행렬 */}
+      {/* 1~6분단(행) × 1~4번(열) 좌석 행렬 */}
       <div className="matrix-grid">
-        {rows.map((rowNum) => (
-          <div key={`row-${rowNum}`} className="matrix-row">
-            <div className="row-label">{rowNum}열</div>
+        {rows.map((bundunNum) => (
+          <div key={`bundun-${bundunNum}`} className="matrix-row">
+            <div className="row-bundun-label">
+              <span className="bundun-title">{bundunNum}분단</span>
+            </div>
             <div className="row-seats">
               {cols.map((colNum) => {
-                const student = getStudentAt(rowNum, colNum);
+                const student = getStudentAt(bundunNum, colNum);
                 if (!student) {
                   return (
-                    <div key={`empty-${rowNum}-${colNum}`} className="student-card empty-seat">
+                    <div key={`empty-${bundunNum}-${colNum}`} className="student-card empty-seat">
                       <span className="empty-text">빈 좌석</span>
                     </div>
                   );
@@ -68,7 +68,7 @@ export function SeatMatrix({ students, getStudentStatus, onToggle, onSetStatus, 
         ))}
       </div>
 
-      {/* 뒤쪽 (교실 뒤) 인디케이터 */}
+      {/* 뒤쪽 인디케이터 */}
       <div className="classroom-back-label">
         <span>교실 뒷문 / 사물함 (뒤)</span>
       </div>

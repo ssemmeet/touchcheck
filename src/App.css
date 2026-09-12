@@ -359,9 +359,57 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+/* 뷰 모드 전환 바 */
+.view-mode-selector-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.view-mode-tabs {
+  display: inline-flex;
+  background-color: var(--color-surface-subtle);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  gap: 4px;
+}
+
+.view-mode-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-md);
+  transition: all 0.16s ease;
+}
+
+.view-mode-tab-btn:hover {
+  color: var(--color-text-main);
+}
+
+.view-mode-tab-btn.active {
+  background-color: #ffffff;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.view-mode-description {
+  margin-bottom: 16px;
 }
 
 .matrix-title {
@@ -374,6 +422,7 @@
 .matrix-subtitle {
   font-size: 13px;
   color: var(--color-text-muted);
+  line-height: 1.5;
 }
 
 .matrix-status-legend {
@@ -405,7 +454,7 @@
 .dot-exempted { background-color: #f59e0b; }
 
 /* ---------------------------------------------------------
-   4. 4*6 좌석 행렬 (Seat Matrix)
+   4. 좌석 배치표 (행: 1~6분단, 열: 1~4번)
    --------------------------------------------------------- */
 .seat-matrix-container {
   display: flex;
@@ -441,23 +490,24 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* 분단 헤더 (1~4분단) */
+/* 열 헤더 (1~4번 자리) */
 .matrix-column-headers {
   display: grid;
-  grid-template-columns: 44px repeat(4, 1fr);
+  grid-template-columns: 60px repeat(4, 1fr);
   gap: 14px;
   padding-left: 0;
+  align-items: center;
+}
+
+.row-label-placeholder {
+  width: 60px;
 }
 
 .column-header-cell {
   text-align: center;
 }
 
-.column-header-cell:first-child {
-  grid-column: 2;
-}
-
-.buntan-badge {
+.col-num-badge {
   font-size: 12px;
   font-weight: 700;
   color: #475569;
@@ -477,22 +527,172 @@
 
 .matrix-row {
   display: grid;
-  grid-template-columns: 44px 1fr;
+  grid-template-columns: 60px 1fr;
   gap: 14px;
   align-items: center;
 }
 
-.row-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-text-dim);
+.row-bundun-label {
   text-align: center;
+}
+
+.bundun-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  display: block;
 }
 
 .row-seats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
+}
+
+/* ---------------------------------------------------------
+   4-1. 번호 순 2열 뷰 (1열 남자, 2열 여자)
+   --------------------------------------------------------- */
+.number-order-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.number-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .number-columns-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.number-column {
+  background-color: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.male-column {
+  border-color: #bfdbfe;
+  background-color: #f8fbff;
+}
+
+.female-column {
+  border-color: #fecdd3;
+  background-color: #fffafb;
+}
+
+.column-header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+}
+
+.banner-male {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.banner-female {
+  background-color: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gender-badge-large {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.badge-male {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.badge-female {
+  background-color: #e11d48;
+  color: #ffffff;
+}
+
+.banner-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.column-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1.2;
+}
+
+.column-desc {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.banner-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stat-count {
+  font-size: 13px;
+  color: var(--color-text-main);
+}
+.stat-count strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.stat-rate {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* 각 열 안의 카드 목록: 2열 그리드로 정렬하여 한눈에 들어오도록 함 */
+.student-cards-column {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .student-cards-column {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------------------------------------------------------
