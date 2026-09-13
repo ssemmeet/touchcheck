@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>오늘의 배움 점검</title>
+<style>
+  :root{
+    --bg: #eef1f8;
+    --board-bg: #ffffff;
+    --header-bg: linear-gradient(135deg,#5b8def,#7aa8ff);
+    --text-main: #24304a;
+    --text-sub: #6b7690;
+    --accent: #4f86f7;
+    --accent-soft: #e7effe;
+    --success: #22c55e;
+    --success-soft: #e5faec;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --tile-bg: #f4f6fb;
+    --tile-border: #dbe3f3;
+    --radius: 18px;
+    --shadow: 0 8px 24px rgba(40,60,110,0.12);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden]{ display:none !important; }
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background: var(--bg);
+    font-family: "Pretendard","Noto Sans KR","Malgun Gothic",-apple-system,"Segoe UI",sans-serif;
+    color: var(--text-main);
+    overflow:hidden;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select:none;
+  }
+  input, textarea{ user-select:text; -webkit-user-select:text; touch-action: manipulation; }
+  button{ font-family:inherit; touch-action: manipulation; cursor:pointer; }
+
+  #app-outer{
+    width:100vw; height:100vh;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  #board{
+    width: min(100vw, calc(100vh * 16 / 9));
+    height: min(100vh, calc(100vw * 9 / 16));
+    background: var(--board-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* ---------- Header ---------- */
+  #header{
+    flex: 0 0 auto;
+    background: var(--header-bg);
+    color:#fff;
+    padding: 1.4vh 2.2vh;
+    display:flex; align-items:center; gap:2vh;
+  }
+  .header-left{ display:flex; flex-direction:column; gap:0.6vh; min-width: 14vh; }
+  .header-date{
+    font-size: clamp(12px,1.6vh,18px); opacity:0.9;
+    background:none; border:none; color:#fff; font-family:inherit; padding:0; text-align:left; cursor:pointer;
+  }
+  .header-date:active{ opacity:0.7; }
+  .period-stepper{ display:flex; align-items:center; gap:0.8vh; }
+  .period-stepper button{
+    width: 4vh; height:4vh; min-width:36px; min-height:36px;
+    border:none; border-radius:50%; background:rgba(255,255,255,0.25); color:#fff;
+    font-size: clamp(14px,2vh,20px); display:flex; align-items:center; justify-content:center;
+  }
+  .period-stepper button:active{ background:rgba(255,255,255,0.4); }
+  .period-label{ font-weight:700; font-size: clamp(13px,1.8vh,18px); min-width: 6.5vh; text-align:center; }
+
+  .header-title{
+    flex:1; text-align:center;
+    font-size: clamp(18px, 3.2vh, 34px);
+    font-weight:800; letter-spacing:-0.5px;
+  }
+
+  .header-right{ display:flex; align-items:center; gap:1.6vh; min-width: 22vh; justify-content:flex-end; }
+  .progress-wrap{ display:flex; flex-direction:column; align-items:flex-end; gap:0.6vh; min-width: 16vh; }
+  .progress-text{ font-size: clamp(12px,1.6vh,17px); font-weight:700; }
+  .progress-bar{ width: 16vh; height: 1.2vh; min-height:8px; background:rgba(255,255,255,0.3); border-radius:10px; overflow:hidden; }
+  .progress-fill{ height:100%; background:#fff; border-radius:10px; transition: width .4s ease; }
+
+  .icon-btn{
+    width:5vh; height:5vh; min-width:44px; min-height:44px;
+    border-radius:50%; border:none; background:rgba(255,255,255,0.25); color:#fff;
+    font-size: clamp(18px,2.4vh,24px); display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:active{ background:rgba(255,255,255,0.4); }
+
+  /* ---------- Mode Tabs ---------- */
+  #mode-tabs{
+    flex:0 0 auto;
+    display:flex; gap:1.2vh; padding: 1.4vh 2.2vh 0;
+  }
+  .mode-tab{
+    flex:1; padding: 1.4vh; border-radius: 14px; border: none;
+    background: var(--tile-bg); color: var(--text-sub); font-weight:700;
+    font-size: clamp(13px,1.8vh,18px);
+    border: 2px solid transparent;
+  }
+  .mode-tab.active{ background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+  /* ---------- Main ---------- */
+  #main{
+    flex:1; overflow-y:auto; padding: 2vh 2.2vh;
+    display:flex; flex-direction:column; justify-content:flex-end;
+  }
+  #student-grid, #group-view, #batch-view{ width:100%; }
+
+  /* Mode A grid */
+  #student-grid{
+    display:flex; flex-direction:column;
+    gap: 2.6vh;
+    height:100%;
+  }
+  .status-section{ display:flex; flex-direction:column; gap:1.2vh; }
+  .status-section.pending-section{
+    flex:1 1 auto; display:flex; flex-direction:column; justify-content:flex-end;
+    border-top: 2px dashed var(--tile-border); padding-top:1.8vh;
+  }
+  .status-section-title{
+    display:flex; align-items:center; gap:0.8vh;
+    font-size: clamp(12px,1.6vh,15px); font-weight:800; color: var(--text-sub);
+  }
+  .status-section-title .count-badge{
+    background: var(--tile-border); color: var(--text-main);
+    border-radius:999px; padding: 0.3vh 1.2vh; font-size: clamp(10px,1.3vh,12px); font-weight:800;
+  }
+  .done-section .status-section-title .count-badge{ background: var(--success-soft); color:#16803c; }
+  .status-tiles{ display:flex; flex-wrap:wrap; justify-content:center; gap: 1.4vh; }
+  .status-empty{ width:100%; text-align:center; color: var(--text-sub); font-size: clamp(11px,1.5vh,14px); padding: 0.6vh 0; }
+
+  /* ---------- Results viewer ---------- */
+  .results-table{ width:100%; border-collapse:collapse; font-size: clamp(11px,1.5vh,14px); }
+  .results-table th, .results-table td{
+    padding: 0.9vh 1vh; border-bottom:1px solid var(--tile-border); text-align:center; white-space:nowrap;
+  }
+  .results-table th{ color: var(--text-sub); font-weight:800; background: var(--tile-bg); position:sticky; top:0; }
+  .results-table td.name-cell{ text-align:left; font-weight:700; }
+  .results-empty{ text-align:center; color: var(--text-sub); padding: 3vh 0; font-size: clamp(12px,1.6vh,14px); }
+
+  .date-picker-wrap{ position:relative; margin-bottom:1.2vh; }
+  .date-picker-btn{
+    width:100%; padding:1.1vh 1.2vh; border-radius:10px; border:2px solid var(--tile-border);
+    background:#fff; font-family:inherit; font-size: clamp(13px,1.7vh,16px); font-weight:700;
+    color: var(--text-main); text-align:left;
+  }
+  .calendar-popup{
+    position:absolute; top:calc(100% + 0.6vh); left:0; z-index:60;
+    background:#fff; border:2px solid var(--tile-border); border-radius:14px;
+    padding:1.4vh; box-shadow: var(--shadow); width:32vh; max-width:80vw;
+  }
+  .calendar-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1vh; }
+  .calendar-header button{
+    width:3.6vh; height:3.6vh; min-width:32px; min-height:32px; border-radius:50%;
+    border:none; background: var(--tile-bg); font-size: clamp(14px,1.8vh,18px); color: var(--text-main);
+  }
+  #cal-month-label{ font-weight:800; font-size: clamp(13px,1.7vh,16px); }
+  .calendar-weekdays{
+    display:grid; grid-template-columns: repeat(7,1fr); text-align:center;
+    color: var(--text-sub); font-size: clamp(10px,1.3vh,12px); font-weight:700; margin-bottom:0.4vh;
+  }
+  .calendar-days{ display:grid; grid-template-columns: repeat(7,1fr); gap:0.3vh; }
+  .calendar-day{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center; position:relative;
+    border-radius:8px; border:none; background:transparent; font-size: clamp(11px,1.5vh,14px); color: var(--text-main);
+  }
+  .calendar-day[disabled]{ visibility:hidden; }
+  .calendar-day.today{ font-weight:800; color: var(--accent); }
+  .calendar-day.selected{ background: var(--accent); color:#fff; font-weight:800; }
+  .calendar-day.has-data::after{
+    content:""; position:absolute; bottom:0.5vh; left:50%; transform:translateX(-50%);
+    width:0.7vh; height:0.7vh; min-width:5px; min-height:5px; border-radius:50%; background: var(--success);
+  }
+  .calendar-day.selected.has-data::after{ background:#fff; }
+  .calendar-show-all{
+    width:100%; padding:0.8vh; margin-bottom:1vh; border-radius:8px; border:2px solid var(--tile-border);
+    background: var(--tile-bg); font-family:inherit; font-size: clamp(11px,1.4vh,13px); font-weight:700; color: var(--text-main);
+  }
+  .student-tile{
+    flex: 0 0 11vh;
+    aspect-ratio: 1 / 0.85;
+    min-height:64px;
+    border-radius: 16px;
+    background: var(--tile-bg);
+    border: 2px solid var(--tile-border);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap: 0.4vh;
+    position:relative;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease;
+  }
+  .student-tile:active{ transform: scale(0.94); }
+  .student-tile .num{ font-size: clamp(16px,2.6vh,28px); font-weight:800; color: var(--text-main); }
+  .student-tile .sub{
+    font-size: clamp(9px,1.2vh,12px); color: var(--text-sub);
+    max-width: 92%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .student-tile.gender-m{ background:#eaf1ff; border-color:#bcd4fb; }
+  .student-tile.gender-f{ background:#fdeaf3; border-color:#f7bfdd; }
+  .student-tile.complete{
+    background: var(--success-soft); border-color: var(--success);
+  }
+  .student-tile.gender-m.complete, .student-tile.gender-f.complete{
+    background: var(--success-soft); border-color: var(--success);
+  }
+  .student-tile.complete .num{ color: #16803c; }
+  .student-tile.complete::after{
+    content:"✓";
+    position:absolute; top:0.6vh; right:0.8vh;
+    color:#fff; background: var(--success);
+    width:2.4vh; height:2.4vh; min-width:20px; min-height:20px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size: clamp(11px,1.4vh,14px); font-weight:800;
+  }
+
+  /* Mode B batch */
+  #item-tabs{ display:flex; flex-wrap:wrap; gap:1vh; margin-bottom:2vh; }
+  .item-tab{
+    padding: 1.2vh 1.8vh; border-radius: 12px; border:2px solid var(--tile-border);
+    background:#fff; color: var(--text-main); font-weight:700;
+    font-size: clamp(12px,1.6vh,16px);
+  }
+  .item-tab.active{ background: var(--accent); border-color: var(--accent); color:#fff; }
+  #item-progress{ margin-bottom:1.6vh; font-size: clamp(12px,1.6vh,16px); color: var(--text-sub); font-weight:600; }
+
+  #batch-grid{
+    display:flex; flex-wrap:wrap;
+    justify-content:center; align-content:flex-end;
+    gap: 1.2vh;
+  }
+  .batch-tile{
+    flex: 0 0 10vh;
+    aspect-ratio: 1/0.8; min-height:60px;
+    border-radius:14px; background: var(--tile-bg); border:2px solid var(--tile-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size: clamp(15px,2.2vh,24px); font-weight:800; color:var(--text-main);
+    transition: transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .batch-tile:active{ transform: scale(0.94); }
+  .batch-tile.gender-m{ background:#eaf1ff; border-color:#bcd4fb; }
+  .batch-tile.gender-f{ background:#fdeaf3; border-color:#f7bfdd; }
+  .batch-tile.checked{ background: var(--success); border-color: var(--success); color:#fff; }
+  .batch-tile.gender-m.checked, .batch-tile.gender-f.checked{ background: var(--success); border-color: var(--success); color:#fff; }
+
+  /* Mode C: group seating chart */
+  #group-grid{
+    display:flex; flex-wrap:wrap;
+    justify-content:center; align-content:flex-end;
+    gap: 2.2vh;
+  }
+  .group-box{
+    flex: 1 1 24vh;
+    max-width: 34vh;
+    background: var(--accent-soft);
+    border: 2px solid #cddbfa;
+    border-radius: 18px;
+    padding: 1.6vh;
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .group-box.complete{ background: var(--success-soft); border-color: var(--success); }
+  .group-box-label{
+    font-weight:800; color: var(--accent); font-size: clamp(13px,1.7vh,17px);
+    margin-bottom: 1.2vh; text-align:center;
+    display:flex; align-items:center; justify-content:center; gap:0.8vh;
+  }
+  .group-box.complete .group-box-label{ color: #16803c; }
+  .group-complete-badge{
+    font-size: clamp(9px,1.2vh,11px); background: var(--success); color:#fff;
+    padding: 0.3vh 0.9vh; border-radius:999px; font-weight:800;
+  }
+  .group-seats{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1vh;
+  }
+  .group-seats .student-tile{ aspect-ratio: 1/0.75; min-height:56px; }
+
+  /* ---------- Overlay / Modal ---------- */
+  .overlay{
+    position:absolute; inset:0; background: rgba(20,26,46,0.55);
+    display:flex; align-items:center; justify-content:center;
+    padding: 3vh; z-index: 50;
+  }
+  .overlay[hidden]{ display:none !important; }
+
+  .modal-card{
+    background:#fff; border-radius: 22px; width:100%; max-width: 62vh;
+    max-height: 90%; overflow-y:auto;
+    padding: 3vh 3vh 2.4vh; box-shadow: var(--shadow);
+    position:relative;
+  }
+  .modal-close{
+    position:absolute; top:1.6vh; right:1.6vh;
+    width:4vh; height:4vh; min-width:36px; min-height:36px; border-radius:50%;
+    border:none; background: var(--tile-bg); color: var(--text-sub);
+    font-size: clamp(16px,2vh,20px); display:flex; align-items:center; justify-content:center;
+  }
+
+  .student-modal-num{
+    text-align:center; font-size: clamp(28px,4.6vh,48px); font-weight:900; color: var(--accent);
+    margin-bottom:0.4vh;
+  }
+  .student-modal-sub{ text-align:center; color: var(--text-sub); font-size: clamp(12px,1.6vh,15px); margin-bottom:2.4vh; }
+
+  .check-row{
+    display:flex; align-items:center; gap: 1.6vh;
+    padding: 1.8vh; border-radius:16px; background: var(--tile-bg);
+    margin-bottom: 1.4vh; border: 2px solid transparent;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .check-row.checked{ background: var(--success-soft); border-color: var(--success); }
+  .check-box{
+    flex:0 0 auto; width: 5.2vh; height:5.2vh; min-width:48px; min-height:48px;
+    border-radius:12px; border:2px solid var(--tile-border); background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size: clamp(20px,2.8vh,28px); color:#fff; font-weight:800;
+  }
+  .check-row.checked .check-box{ background: var(--success); border-color: var(--success); }
+  .check-label{ flex:1; font-size: clamp(14px,1.9vh,18px); font-weight:600; line-height:1.4; }
+  .check-row.bounce{ animation: bounce .3s ease; }
+  @keyframes bounce{ 0%{ transform:scale(1);} 40%{ transform:scale(1.04);} 100%{ transform:scale(1);} }
+
+  /* ---------- Teacher gate (passcode) ---------- */
+  .gate-title{ text-align:center; font-weight:800; font-size: clamp(16px,2.2vh,22px); margin-bottom:1.6vh; }
+  .gate-dots{ display:flex; justify-content:center; gap:1.6vh; margin-bottom:2.4vh; }
+  .gate-dot{
+    width:2.2vh; height:2.2vh; min-width:16px; min-height:16px; border-radius:50%;
+    background: var(--tile-border);
+  }
+  .gate-dot.filled{ background: var(--accent); }
+  .gate-error{ text-align:center; color: var(--danger); font-size: clamp(12px,1.5vh,14px); min-height:2.4vh; margin-bottom:0.6vh; font-weight:700; }
+  .numpad{ display:grid; grid-template-columns: repeat(3,1fr); gap: 1.2vh; }
+  .numpad button{
+    padding: 2vh 0; border-radius:14px; border:2px solid var(--tile-border); background: var(--tile-bg);
+    font-size: clamp(18px,2.6vh,26px); font-weight:700; color: var(--text-main);
+  }
+  .numpad button:active{ background: var(--accent-soft); }
+
+  /* ---------- Settings ---------- */
+  .settings-section{ margin-bottom: 2.6vh; }
+  .settings-label{ font-weight:800; font-size: clamp(14px,1.9vh,18px); margin-bottom:1.2vh; }
+  .stepper-row{ display:flex; align-items:center; gap:1.6vh; }
+  .stepper-row button{
+    width:5.2vh; height:5.2vh; min-width:44px; min-height:44px; border-radius:12px;
+    border:2px solid var(--tile-border); background: var(--tile-bg); font-size: clamp(20px,2.6vh,26px); font-weight:800;
+  }
+  .stepper-value{ font-size: clamp(20px,2.8vh,28px); font-weight:800; min-width: 6vh; text-align:center; }
+
+  .roster-header{
+    display:flex; align-items:center; gap:1vh; padding: 0 1.2vh; margin-bottom:0.6vh;
+    color: var(--text-sub); font-size: clamp(10px,1.3vh,12px); font-weight:700;
+  }
+  .roster-header span:nth-child(1){ flex:0 0 6.2vh; }
+  .roster-header span:nth-child(2){ flex:0 0 10.4vh; }
+  .roster-header span:nth-child(3){ flex:1; }
+  .roster-header span:nth-child(4){ flex:0 0 11vh; }
+  .roster-header span:nth-child(5){ flex:0 0 4.6vh; }
+  .roster-row{
+    display:flex; align-items:center; gap:1vh; flex-wrap:wrap;
+    background: var(--tile-bg); border-radius:12px; padding: 0.9vh 1.2vh;
+  }
+  .roster-num-input{
+    flex:0 0 6.2vh; width:6.2vh; padding:0.8vh; border-radius:8px; border:2px solid var(--tile-border);
+    text-align:center; font-size: clamp(12px,1.6vh,15px); font-family:inherit; font-weight:800;
+  }
+  .roster-gender-toggle{ flex:0 0 10.4vh; display:flex; gap:0.5vh; }
+  .gender-btn{
+    flex:1; padding: 0.8vh 0; border-radius:8px; border:2px solid var(--tile-border);
+    background:#fff; color: var(--text-sub); font-size: clamp(11px,1.4vh,13px); font-weight:700;
+  }
+  .gender-btn[data-gender="M"].active{ background:#4f86f7; border-color:#4f86f7; color:#fff; }
+  .gender-btn[data-gender="F"].active{ background:#ec4899; border-color:#ec4899; color:#fff; }
+  .roster-name-input{
+    flex:1; min-width: 10vh; padding: 0.9vh 1vh; border-radius:10px; border:2px solid var(--tile-border);
+    font-size: clamp(12px,1.6vh,15px); font-family:inherit;
+  }
+  .roster-group-input{
+    flex:0 0 11vh; width:11vh; padding:0.8vh; border-radius:8px; border:2px solid var(--tile-border);
+    text-align:center; font-size: clamp(12px,1.6vh,15px); font-family:inherit;
+  }
+
+  .item-edit-row{ display:flex; align-items:center; gap:1vh; margin-bottom:1vh; }
+  .item-edit-row input{
+    flex:1; padding: 1.4vh; border-radius:12px; border:2px solid var(--tile-border);
+    font-size: clamp(13px,1.7vh,16px); font-family:inherit;
+  }
+  .item-edit-row .del-btn{
+    flex:0 0 auto; width:4.6vh; height:4.6vh; min-width:40px; min-height:40px; border-radius:10px;
+    border:none; background:#fde8e8; color: var(--danger); font-size: clamp(16px,2vh,20px); font-weight:800;
+  }
+  .add-item-btn{
+    width:100%; padding:1.4vh; border-radius:12px; border:2px dashed var(--tile-border);
+    background:#fff; color: var(--accent); font-weight:700; font-size: clamp(13px,1.7vh,16px);
+  }
+
+  .btn{
+    padding: 1.6vh; border-radius:14px; border:none; font-weight:800;
+    font-size: clamp(14px,1.9vh,18px); width:100%;
+  }
+  .btn-primary{ background: var(--accent); color:#fff; }
+  .btn-secondary{ background: var(--tile-bg); color: var(--text-main); }
+  .btn-danger{ background:#fde8e8; color: var(--danger); }
+  .btn-row{ display:flex; gap:1.2vh; margin-top: 1vh; }
+  .btn-row .btn{ flex:1; }
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:absolute; left:50%; bottom:4vh; transform: translateX(-50%) translateY(20px);
+    background: rgba(20,26,46,0.92); color:#fff; padding: 1.8vh 3vh; border-radius: 999px;
+    font-size: clamp(14px,2vh,20px); font-weight:700; opacity:0; pointer-events:none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 100; white-space:nowrap;
+  }
+  #toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background: var(--tile-border); border-radius:8px; }
+</style>
+</head>
+<body>
+
+<div id="app-outer">
+  <div id="board">
+
+    <div id="header">
+      <div class="header-left" style="position:relative;">
+        <button type="button" class="header-date" id="header-date-btn"></button>
+        <div id="header-calendar" class="calendar-popup" hidden>
+          <button type="button" id="header-cal-today-btn" class="calendar-show-all">오늘로 이동</button>
+          <div class="calendar-header">
+            <button type="button" id="header-cal-prev-month">‹</button>
+            <div id="header-cal-month-label"></div>
+            <button type="button" id="header-cal-next-month">›</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+          </div>
+          <div id="header-calendar-days" class="calendar-days"></div>
+        </div>
+        <div class="period-stepper">
+          <button id="period-prev">‹</button>
+          <div class="period-label" id="period-label">1교시</div>
+          <button id="period-next">›</button>
+        </div>
+      </div>
+
+      <div class="header-title">오늘의 배움 점검</div>
+
+      <div class="header-right">
+        <div class="progress-wrap">
+          <div class="progress-text" id="progress-text">0 / 25</div>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        </div>
+        <button class="icon-btn" id="settings-btn" title="교사 설정">⚙</button>
+      </div>
+    </div>
+
+    <div id="mode-tabs">
+      <button class="mode-tab active" data-mode="A" id="tab-mode-a">번호판 모드</button>
+      <button class="mode-tab" data-mode="C" id="tab-mode-c">모둠 자리 배치도</button>
+      <button class="mode-tab" data-mode="B" id="tab-mode-b">항목별 일괄 체크</button>
+    </div>
+
+    <div id="main">
+      <div id="student-grid"></div>
+
+      <div id="group-view" hidden>
+        <div id="group-grid"></div>
+      </div>
+
+      <div id="batch-view" hidden>
+        <div id="item-tabs"></div>
+        <div id="item-progress"></div>
+        <div id="batch-grid"></div>
+      </div>
+    </div>
+
+    <!-- Student self-check modal -->
+    <div class="overlay" id="student-overlay" hidden>
+      <div class="modal-card">
+        <button class="modal-close" id="student-modal-close">✕</button>
+        <div class="student-modal-num" id="student-modal-num">1번</div>
+        <div class="student-modal-sub">오늘의 활동을 스스로 점검해 보세요</div>
+        <div id="student-checklist"></div>
+      </div>
+    </div>
+
+    <!-- Teacher passcode gate -->
+    <div class="overlay" id="gate-overlay" hidden>
+      <div class="modal-card" style="max-width:40vh;">
+        <button class="modal-close" id="gate-close">✕</button>
+        <div class="gate-title">🔒 교사 인증</div>
+        <div class="gate-dots" id="gate-dots"></div>
+        <div class="gate-error" id="gate-error"></div>
+        <div class="numpad" id="gate-numpad"></div>
+      </div>
+    </div>
+
+    <!-- Teacher settings -->
+    <div class="overlay" id="settings-overlay" hidden>
+      <div class="modal-card" style="max-width:70vh;">
+        <button class="modal-close" id="settings-close">✕</button>
+        <div class="gate-title" style="margin-bottom:2.2vh;">교사 설정</div>
+
+        <div class="settings-section">
+          <div class="settings-label">학생 명단 (번호 · 성별 · 이름 · 모둠)</div>
+          <div style="color:var(--text-sub); font-size: clamp(11px,1.4vh,13px); margin-bottom:1vh;">
+            번호, 성별, 이름, 모둠을 직접 입력하거나 수정하세요. 이름은 테스트용 예시가 자동으로 채워져 있어요.
+          </div>
+          <div class="roster-header">
+            <span>번호</span><span>성별</span><span>이름</span><span>모둠</span><span></span>
+          </div>
+          <div id="roster-list" style="max-height:34vh; overflow-y:auto; display:flex; flex-direction:column; gap:0.8vh;"></div>
+          <button class="add-item-btn" id="add-student-btn" style="margin-top:1.2vh;">＋ 학생 추가</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">체크리스트 항목 (교시별로 다르게 설정 가능)</div>
+          <div id="item-period-tabs" style="display:flex; flex-wrap:wrap; gap:0.6vh; margin-bottom:1.2vh;"></div>
+          <div id="item-edit-list"></div>
+          <button class="add-item-btn" id="add-item-btn">＋ 항목 추가</button>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="settings-cancel">취소</button>
+          <button class="btn btn-primary" id="settings-save">저장</button>
+        </div>
+
+        <div class="settings-section" style="margin-top:2.6vh;">
+          <div class="settings-label">데이터 관리</div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn btn-danger" id="reset-btn">오늘 기록 초기화</button>
+            <button class="btn btn-secondary" id="results-btn">📊 결과 보기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teacher results viewer -->
+    <div class="overlay" id="results-overlay" hidden>
+      <div class="modal-card" style="max-width:80vh;">
+        <button class="modal-close" id="results-close">✕</button>
+        <div class="gate-title" style="margin-bottom:1.8vh;">학생 결과 보기</div>
+
+        <div style="display:flex; gap:1vh; margin-bottom:1.8vh;">
+          <button class="mode-tab active" id="results-tab-date">날짜별 보기</button>
+          <button class="mode-tab" id="results-tab-student">학생별 보기</button>
+        </div>
+
+        <div id="results-date-view">
+          <div class="date-picker-wrap">
+            <button type="button" id="results-date-btn" class="date-picker-btn">📅 날짜 선택</button>
+            <div id="results-calendar" class="calendar-popup" hidden>
+              <div class="calendar-header">
+                <button type="button" id="cal-prev-month">‹</button>
+                <div id="cal-month-label"></div>
+                <button type="button" id="cal-next-month">›</button>
+              </div>
+              <div class="calendar-weekdays">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div id="calendar-days" class="calendar-days"></div>
+            </div>
+          </div>
+          <div id="results-date-period-tabs" style="display:flex; flex-wrap:wrap; gap:0.6vh; margin-bottom:1.2vh;"></div>
+          <div id="results-date-table" style="max-height:36vh; overflow:auto;"></div>
+        </div>
+
+        <div id="results-student-view" hidden>
+          <select id="results-student-select" style="width:100%; padding:1vh; border-radius:10px; border:2px solid var(--tile-border); font-family:inherit; font-size:clamp(12px,1.6vh,15px); margin-bottom:1.2vh;"></select>
+          <div class="date-picker-wrap">
+            <button type="button" id="results-student-date-btn" class="date-picker-btn">📅 전체 날짜</button>
+            <div id="results-student-calendar" class="calendar-popup" hidden>
+              <button type="button" id="student-cal-show-all" class="calendar-show-all">전체 날짜 보기</button>
+              <div class="calendar-header">
+                <button type="button" id="student-cal-prev-month">‹</button>
+                <div id="student-cal-month-label"></div>
+                <button type="button" id="student-cal-next-month">›</button>
+              </div>
+              <div class="calendar-weekdays">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div id="student-calendar-days" class="calendar-days"></div>
+            </div>
+          </div>
+          <div id="results-student-table" style="max-height:36vh; overflow:auto;"></div>
+        </div>
+
+        <button class="btn btn-secondary" id="results-download-btn" style="margin-top:2vh;">📥 전체 데이터 다운로드 (CSV)</button>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "selfCheckData";
+  var DEFAULT_ITEMS = [
+    "교과서와 필기도구를 책상 위에 준비했나요?",
+    "오늘의 탐구 활동에 적극적으로 참여했나요?",
+    "사용한 도구를 제자리에 바르게 정리했나요?"
+  ];
+  var DEFAULT_NAME_POOL = [
+    "김민준","이서연","박도윤","최지우","정하윤","강은우","조서준","윤지안","장하은","임지호",
+    "한소율","오준서","서지민","신아린","권도현","황유나","안준영","송예은","전시우","홍서아",
+    "문지후","양하린","배준혁","조은서","백승민","유나윤","임재현","오하람","신동현","조아영",
+    "이준혁","박서윤","김하준","최수아","정민재","강서현","조유준","윤채원","장도훈","임서율",
+    "한지원","오은찬","서하윤","신재이","권시아","황준서","안서윤","송민준","전하은","홍준혁",
+    "문서아","양지훈","배은우","조민서","백하율","유준영","임나윤","오시우","신예린","권도영"
+  ];
+  function defaultNameFor(num){
+    return DEFAULT_NAME_POOL[(num - 1) % DEFAULT_NAME_POOL.length];
+  }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  function buildDefaultRoster(count){
+    var roster = [];
+    for(var i=1;i<=count;i++){
+      roster.push({
+        num: i,
+        gender: i <= Math.ceil(count/2) ? "M" : "F",
+        name: defaultNameFor(i),
+        group: Math.floor((i-1)/4) + 1
+      });
+    }
+    return roster;
+  }
+
+  function defaultState(){
+    return {
+      classSettings: {
+        passcode: "1234",
+        checklistItemsByPeriod: {},
+        currentPeriod: 1,
+        roster: buildDefaultRoster(25)
+      },
+      records: {}
+    };
+  }
+
+  function getChecklistItems(period){
+    var items = state.classSettings.checklistItemsByPeriod[period];
+    return (items && items.length) ? items : DEFAULT_ITEMS;
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      var def = defaultState();
+      parsed.classSettings = Object.assign(def.classSettings, parsed.classSettings || {});
+      parsed.records = parsed.records || {};
+      return parsed;
+    }catch(e){
+      return defaultState();
+    }
+  }
+
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  var state = loadState();
+
+  function todayKey(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+
+  var boardDate = todayKey();
+  function boardDateKey(){
+    return boardDate;
+  }
+
+  function getRecord(studentNum){
+    var key = boardDateKey();
+    var period = state.classSettings.currentPeriod;
+    var periodRecs = state.records[key] ? state.records[key][period] : null;
+    var arr = periodRecs ? periodRecs["student_" + studentNum] : null;
+    var itemCount = getChecklistItems(period).length;
+    if(!arr) arr = new Array(itemCount).fill(false);
+    if(arr.length < itemCount){
+      arr = arr.concat(new Array(itemCount - arr.length).fill(false));
+    } else if(arr.length > itemCount){
+      arr = arr.slice(0, itemCount);
+    }
+    return arr;
+  }
+
+  function setRecord(studentNum, arr){
+    var key = boardDateKey();
+    var period = state.classSettings.currentPeriod;
+    if(!state.records[key]) state.records[key] = {};
+    if(!state.records[key][period]) state.records[key][period] = {};
+    state.records[key][period]["student_" + studentNum] = arr;
+    saveState();
+  }
+
+  function isComplete(studentNum){
+    var arr = getRecord(studentNum);
+    return arr.length > 0 && arr.every(Boolean);
+  }
+
+  function findRosterEntry(num){
+    var roster = state.classSettings.roster;
+    for(var i=0;i<roster.length;i++){ if(roster[i].num === num) return roster[i]; }
+    return null;
+  }
+
+  function getStudentNumbers(){
+    return state.classSettings.roster.map(function(r){ return r.num; }).sort(function(a,b){ return a-b; });
+  }
+
+  function getStudentName(num){
+    var entry = findRosterEntry(num);
+    return entry && entry.name ? entry.name : ("학생" + num);
+  }
+
+  function getStudentGender(num){
+    var entry = findRosterEntry(num);
+    return entry ? entry.gender : "M";
+  }
+
+  function getStudentGroupId(num){
+    var entry = findRosterEntry(num);
+    return entry ? entry.group : 1;
+  }
+
+  function completeCount(){
+    var numbers = getStudentNumbers();
+    var c = 0;
+    numbers.forEach(function(n){ if(isComplete(n)) c++; });
+    return c;
+  }
+
+  // ---------- beep ----------
+  var audioCtx = null;
+  function beep(){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+    }catch(e){}
+  }
+
+  // ---------- toast ----------
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(msg, duration){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, duration || 2200);
+  }
+
+  // ---------- header ----------
+  var headerDateBtn = document.getElementById("header-date-btn");
+  var periodLabelEl = document.getElementById("period-label");
+  var progressTextEl = document.getElementById("progress-text");
+  var progressFillEl = document.getElementById("progress-fill");
+
+  function formatBoardDateLabel(){
+    var parts = boardDate.split("-").map(Number);
+    var d = new Date(parts[0], parts[1]-1, parts[2]);
+    var dayNames = ["일","월","화","수","목","금","토"];
+    var label = parts[1] + "월 " + parts[2] + "일 (" + dayNames[d.getDay()] + ")";
+    return boardDate === todayKey() ? label : label + " ⚠";
+  }
+
+  function renderHeader(){
+    headerDateBtn.textContent = formatBoardDateLabel();
+    periodLabelEl.textContent = state.classSettings.currentPeriod + "교시";
+    var total = getStudentNumbers().length;
+    var done = completeCount();
+    progressTextEl.textContent = done + " / " + total;
+    progressFillEl.style.width = (total > 0 ? (done/total*100) : 0) + "%";
+  }
+
+  var headerCalendar = document.getElementById("header-calendar");
+  var headerCalPicker = setupDatePicker({
+    btnEl: headerDateBtn,
+    popupEl: headerCalendar,
+    monthLabelEl: document.getElementById("header-cal-month-label"),
+    daysEl: document.getElementById("header-calendar-days"),
+    prevBtnEl: document.getElementById("header-cal-prev-month"),
+    nextBtnEl: document.getElementById("header-cal-next-month"),
+    showAllBtnEl: document.getElementById("header-cal-today-btn"),
+    getSelectedDate: function(){ return boardDate; },
+    onSelect: function(dateStr){
+      boardDate = dateStr || todayKey();
+      renderHeader();
+      renderCurrentView();
+    }
+  });
+  document.addEventListener("click", function(e){
+    if(!headerCalendar.hidden && e.target !== headerDateBtn && !headerCalendar.contains(e.target)){
+      headerCalendar.hidden = true;
+    }
+  });
+
+  document.getElementById("period-prev").addEventListener("click", function(){
+    state.classSettings.currentPeriod = Math.max(1, state.classSettings.currentPeriod - 1);
+    saveState(); renderHeader(); renderCurrentView();
+  });
+  document.getElementById("period-next").addEventListener("click", function(){
+    state.classSettings.currentPeriod = Math.min(6, state.classSettings.currentPeriod + 1);
+    saveState(); renderHeader(); renderCurrentView();
+  });
+
+  // ---------- mode tabs ----------
+  var currentMode = "A";
+  var gridEl = document.getElementById("student-grid");
+  var groupViewEl = document.getElementById("group-view");
+  var batchViewEl = document.getElementById("batch-view");
+  var tabA = document.getElementById("tab-mode-a");
+  var tabC = document.getElementById("tab-mode-c");
+  var tabB = document.getElementById("tab-mode-b");
+
+  function renderCurrentView(){
+    if(currentMode === "A") renderGrid();
+    else if(currentMode === "C") renderGroups();
+    else renderBatch();
+  }
+
+  function setMode(mode){
+    currentMode = mode;
+    tabA.classList.toggle("active", mode === "A");
+    tabC.classList.toggle("active", mode === "C");
+    tabB.classList.toggle("active", mode === "B");
+    gridEl.hidden = mode !== "A";
+    groupViewEl.hidden = mode !== "C";
+    batchViewEl.hidden = mode !== "B";
+    renderCurrentView();
+  }
+  tabA.addEventListener("click", function(){ setMode("A"); });
+  tabC.addEventListener("click", function(){ setMode("C"); });
+  tabB.addEventListener("click", function(){ setMode("B"); });
+
+  // ---------- Mode A: student grid ----------
+  function studentTileHtml(num, complete){
+    var genderClass = getStudentGender(num) === "F" ? "gender-f" : "gender-m";
+    return '<button class="student-tile ' + genderClass + (complete ? " complete" : "") + '" data-num="' + num + '">' +
+             '<div class="num">' + num + '</div>' +
+             '<div class="sub">' + escapeHtml(getStudentName(num)) + '</div>' +
+           '</button>';
+  }
+
+  function renderGrid(){
+    var numbers = getStudentNumbers();
+    var done = [], pending = [];
+    numbers.forEach(function(n){ (isComplete(n) ? done : pending).push(n); });
+
+    var html = "";
+    html += '<div class="status-section done-section">' +
+              '<div class="status-section-title">✅ 점검 완료 <span class="count-badge">' + done.length + '명</span></div>' +
+              '<div class="status-tiles">' +
+                (done.length ? done.map(function(n){ return studentTileHtml(n, true); }).join("") : '<div class="status-empty">아직 없어요</div>') +
+              '</div>' +
+            '</div>';
+    html += '<div class="status-section pending-section">' +
+              '<div class="status-section-title">🕒 아직 점검 전 <span class="count-badge">' + pending.length + '명</span></div>' +
+              '<div class="status-tiles">' +
+                (pending.length ? pending.map(function(n){ return studentTileHtml(n, false); }).join("") : '<div class="status-empty">모두 완료했어요! 🎉</div>') +
+              '</div>' +
+            '</div>';
+
+    gridEl.innerHTML = html;
+    Array.prototype.forEach.call(gridEl.querySelectorAll(".student-tile"), function(tile){
+      tile.addEventListener("click", function(){
+        openStudentModal(parseInt(tile.getAttribute("data-num"), 10));
+      });
+    });
+  }
+
+  // ---------- Mode C: group seating chart ----------
+  var groupGridEl = document.getElementById("group-grid");
+
+  function renderGroups(){
+    var numbers = getStudentNumbers();
+    var groups = {};
+    numbers.forEach(function(num, idx){
+      var gid = getStudentGroupId(num);
+      if(!groups[gid]) groups[gid] = [];
+      groups[gid].push(num);
+    });
+    var groupIds = Object.keys(groups).map(Number).sort(function(a,b){ return a-b; });
+
+    var html = "";
+    groupIds.forEach(function(gid){
+      var members = groups[gid];
+      var allDone = members.length > 0 && members.every(function(num){ return isComplete(num); });
+      html += '<div class="group-box' + (allDone ? " complete" : "") + '">' +
+                '<div class="group-box-label">' + gid + '모둠' +
+                  (allDone ? '<span class="group-complete-badge">✅ 완료</span>' : '') +
+                '</div><div class="group-seats">';
+      members.forEach(function(num){
+        html += studentTileHtml(num, isComplete(num));
+      });
+      html += '</div></div>';
+    });
+    groupGridEl.innerHTML = html;
+    Array.prototype.forEach.call(groupGridEl.querySelectorAll(".student-tile"), function(tile){
+      tile.addEventListener("click", function(){
+        openStudentModal(parseInt(tile.getAttribute("data-num"), 10));
+      });
+    });
+  }
+
+  // ---------- Student modal ----------
+  var studentOverlay = document.getElementById("student-overlay");
+  var studentModalNum = document.getElementById("student-modal-num");
+  var studentChecklist = document.getElementById("student-checklist");
+  var currentStudent = null;
+  var autoCloseTimer = null;
+
+  function openStudentModal(num){
+    currentStudent = num;
+    studentModalNum.textContent = num + "번 · " + getStudentName(num);
+    renderStudentChecklist();
+    studentOverlay.hidden = false;
+  }
+
+  function closeStudentModal(){
+    studentOverlay.hidden = true;
+    clearTimeout(autoCloseTimer);
+    currentStudent = null;
+    if(currentMode === "A") renderGrid();
+    else if(currentMode === "C") renderGroups();
+    renderHeader();
+  }
+
+  function renderStudentChecklist(){
+    var items = getChecklistItems(state.classSettings.currentPeriod);
+    var arr = getRecord(currentStudent);
+    var html = "";
+    for(var i=0;i<items.length;i++){
+      html += '<div class="check-row' + (arr[i] ? " checked" : "") + '" data-idx="' + i + '">' +
+                '<div class="check-box">' + (arr[i] ? "✓" : "") + '</div>' +
+                '<div class="check-label">' + items[i] + '</div>' +
+              '</div>';
+    }
+    studentChecklist.innerHTML = html;
+    Array.prototype.forEach.call(studentChecklist.querySelectorAll(".check-row"), function(row){
+      row.addEventListener("click", function(){
+        var idx = parseInt(row.getAttribute("data-idx"), 10);
+        toggleCheck(currentStudent, idx, row);
+      });
+    });
+  }
+
+  function toggleCheck(num, idx, rowEl){
+    var arr = getRecord(num);
+    var wasComplete = arr.every(Boolean);
+    arr[idx] = !arr[idx];
+    setRecord(num, arr);
+    beep();
+
+    if(rowEl){
+      rowEl.classList.toggle("checked", arr[idx]);
+      rowEl.querySelector(".check-box").textContent = arr[idx] ? "✓" : "";
+      rowEl.classList.remove("bounce");
+      void rowEl.offsetWidth;
+      rowEl.classList.add("bounce");
+    }
+
+    var nowComplete = arr.every(Boolean);
+    if(nowComplete && !wasComplete){
+      showToast("🎉 " + num + "번 점검 완료!", 2600);
+      if(studentOverlay.hidden === false && currentStudent === num){
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = setTimeout(closeStudentModal, 3000);
+      }
+    }
+    if(currentMode === "B") renderBatch();
+  }
+
+  document.getElementById("student-modal-close").addEventListener("click", closeStudentModal);
+  studentOverlay.addEventListener("click", function(e){
+    if(e.target === studentOverlay) closeStudentModal();
+  });
+
+  // ---------- Mode B: batch by item ----------
+  var currentItemIdx = 0;
+  var itemTabsEl = document.getElementById("item-tabs");
+  var itemProgressEl = document.getElementById("item-progress");
+  var batchGridEl = document.getElementById("batch-grid");
+
+  function renderBatch(){
+    var items = getChecklistItems(state.classSettings.currentPeriod);
+    if(currentItemIdx >= items.length) currentItemIdx = 0;
+
+    itemTabsEl.innerHTML = items.map(function(label, i){
+      return '<button class="item-tab' + (i === currentItemIdx ? " active" : "") + '" data-idx="' + i + '">항목 ' + (i+1) + '</button>';
+    }).join("");
+    Array.prototype.forEach.call(itemTabsEl.querySelectorAll(".item-tab"), function(btn){
+      btn.addEventListener("click", function(){
+        currentItemIdx = parseInt(btn.getAttribute("data-idx"), 10);
+        renderBatch();
+      });
+    });
+
+    var numbers = getStudentNumbers();
+    var doneCount = 0;
+    var tileHtml = "";
+    numbers.forEach(function(num){
+      var arr = getRecord(num);
+      var checked = !!arr[currentItemIdx];
+      if(checked) doneCount++;
+      var genderClass = getStudentGender(num) === "F" ? "gender-f" : "gender-m";
+      tileHtml += '<button class="batch-tile ' + genderClass + (checked ? " checked" : "") + '" data-num="' + num + '" title="' + escapeHtml(getStudentName(num)) + '">' + num + '</button>';
+    });
+    batchGridEl.innerHTML = tileHtml;
+
+    itemProgressEl.textContent = "「" + (items[currentItemIdx] || "") + "」  —  " + doneCount + " / " + numbers.length + "명 체크됨";
+
+    Array.prototype.forEach.call(batchGridEl.querySelectorAll(".batch-tile"), function(tile){
+      tile.addEventListener("click", function(){
+        var num = parseInt(tile.getAttribute("data-num"), 10);
+        toggleCheck(num, currentItemIdx, null);
+        tile.classList.toggle("checked");
+        renderBatch();
+      });
+    });
+  }
+
+  // ---------- Teacher gate ----------
+  var gateOverlay = document.getElementById("gate-overlay");
+  var gateDots = document.getElementById("gate-dots");
+  var gateNumpad = document.getElementById("gate-numpad");
+  var gateError = document.getElementById("gate-error");
+  var gateInput = "";
+
+  function renderGateDots(){
+    var len = state.classSettings.passcode.length;
+    var html = "";
+    for(var i=0;i<len;i++){
+      html += '<div class="gate-dot' + (i < gateInput.length ? " filled" : "") + '"></div>';
+    }
+    gateDots.innerHTML = html;
+  }
+
+  function buildNumpad(){
+    var keys = ["1","2","3","4","5","6","7","8","9","","0","←"];
+    gateNumpad.innerHTML = keys.map(function(k){
+      if(k === "") return '<div></div>';
+      return '<button data-key="' + k + '">' + k + '</button>';
+    }).join("");
+    Array.prototype.forEach.call(gateNumpad.querySelectorAll("button"), function(btn){
+      btn.addEventListener("click", function(){
+        var key = btn.getAttribute("data-key");
+        if(key === "←"){
+          gateInput = gateInput.slice(0, -1);
+        } else if(gateInput.length < state.classSettings.passcode.length){
+          gateInput += key;
+        }
+        gateError.textContent = "";
+        renderGateDots();
+        if(gateInput.length === state.classSettings.passcode.length){
+          if(gateInput === state.classSettings.passcode){
+            gateOverlay.hidden = true;
+            openSettings();
+          } else {
+            gateError.textContent = "비밀번호가 올바르지 않습니다";
+            setTimeout(function(){ gateInput = ""; renderGateDots(); }, 500);
+          }
+        }
+      });
+    });
+  }
+  buildNumpad();
+
+  function openGate(){
+    headerCalendar.hidden = true;
+    gateInput = "";
+    gateError.textContent = "";
+    renderGateDots();
+    gateOverlay.hidden = false;
+  }
+  document.getElementById("settings-btn").addEventListener("click", openGate);
+  document.getElementById("gate-close").addEventListener("click", function(){ gateOverlay.hidden = true; });
+  gateOverlay.addEventListener("click", function(e){ if(e.target === gateOverlay) gateOverlay.hidden = true; });
+
+  // ---------- Teacher settings ----------
+  var settingsOverlay = document.getElementById("settings-overlay");
+  var itemEditList = document.getElementById("item-edit-list");
+  var itemPeriodTabsEl = document.getElementById("item-period-tabs");
+  var rosterListEl = document.getElementById("roster-list");
+  var draftItems, draftRoster, draftChecklistByPeriod, draftItemsPeriod;
+
+  function renderRosterList(){
+    rosterListEl.innerHTML = draftRoster.map(function(r){
+      return '<div class="roster-row">' +
+               '<input type="number" class="roster-num-input" value="' + r.num + '" min="1" max="99">' +
+               '<div class="roster-gender-toggle">' +
+                 '<button type="button" class="gender-btn' + (r.gender === "M" ? " active" : "") + '" data-gender="M">남</button>' +
+                 '<button type="button" class="gender-btn' + (r.gender === "F" ? " active" : "") + '" data-gender="F">여</button>' +
+               '</div>' +
+               '<input type="text" class="roster-name-input" value="' + escapeHtml(r.name) + '">' +
+               '<input type="number" class="roster-group-input" min="1" max="30" value="' + r.group + '">' +
+               '<button type="button" class="del-btn roster-del-btn">✕</button>' +
+             '</div>';
+    }).join("");
+
+    Array.prototype.forEach.call(rosterListEl.querySelectorAll(".roster-row"), function(row, idx){
+      row.querySelector(".roster-num-input").addEventListener("input", function(e){
+        var v = parseInt(e.target.value, 10);
+        if(!isNaN(v)) draftRoster[idx].num = v;
+      });
+      row.querySelector(".roster-name-input").addEventListener("input", function(e){
+        draftRoster[idx].name = e.target.value;
+      });
+      row.querySelector(".roster-group-input").addEventListener("input", function(e){
+        var v = parseInt(e.target.value, 10);
+        draftRoster[idx].group = (v && v > 0) ? v : 1;
+      });
+      Array.prototype.forEach.call(row.querySelectorAll(".gender-btn"), function(btn){
+        btn.addEventListener("click", function(){
+          draftRoster[idx].gender = btn.getAttribute("data-gender");
+          Array.prototype.forEach.call(row.querySelectorAll(".gender-btn"), function(b){
+            b.classList.toggle("active", b === btn);
+          });
+        });
+      });
+      row.querySelector(".roster-del-btn").addEventListener("click", function(){
+        draftRoster.splice(idx, 1);
+        renderRosterList();
+      });
+    });
+  }
+
+  document.getElementById("add-student-btn").addEventListener("click", function(){
+    var maxNum = draftRoster.reduce(function(m, r){ return Math.max(m, r.num); }, 0);
+    var nextNum = maxNum + 1;
+    draftRoster.push({
+      num: nextNum,
+      gender: "M",
+      name: defaultNameFor(nextNum),
+      group: draftRoster.length ? draftRoster[draftRoster.length - 1].group : 1
+    });
+    renderRosterList();
+  });
+
+  function openSettings(){
+    draftRoster = state.classSettings.roster.map(function(r){ return Object.assign({}, r); });
+    draftChecklistByPeriod = {};
+    Object.keys(state.classSettings.checklistItemsByPeriod).forEach(function(p){
+      draftChecklistByPeriod[p] = state.classSettings.checklistItemsByPeriod[p].slice();
+    });
+    renderRosterList();
+    loadDraftItemsForPeriod(state.classSettings.currentPeriod);
+    settingsOverlay.hidden = false;
+  }
+
+  function loadDraftItemsForPeriod(period){
+    draftItemsPeriod = period;
+    if(!draftChecklistByPeriod[period]){
+      draftChecklistByPeriod[period] = getChecklistItems(period).slice();
+    }
+    draftItems = draftChecklistByPeriod[period];
+    renderItemPeriodTabs();
+    renderItemEditList();
+  }
+
+  function renderItemPeriodTabs(){
+    var html = "";
+    for(var p=1;p<=6;p++){
+      html += '<button type="button" class="item-tab' + (p === draftItemsPeriod ? " active" : "") +
+        '" data-period="' + p + '" style="padding:0.8vh 1.4vh; font-size:clamp(11px,1.4vh,13px);">' + p + '교시</button>';
+    }
+    itemPeriodTabsEl.innerHTML = html;
+    Array.prototype.forEach.call(itemPeriodTabsEl.querySelectorAll(".item-tab"), function(btn){
+      btn.addEventListener("click", function(){
+        loadDraftItemsForPeriod(parseInt(btn.getAttribute("data-period"), 10));
+      });
+    });
+  }
+
+  function renderItemEditList(){
+    itemEditList.innerHTML = draftItems.map(function(text, i){
+      return '<div class="item-edit-row" data-idx="' + i + '">' +
+               '<input type="text" value="' + text.replace(/"/g,"&quot;") + '">' +
+               '<button class="del-btn" data-idx="' + i + '">✕</button>' +
+             '</div>';
+    }).join("");
+
+    Array.prototype.forEach.call(itemEditList.querySelectorAll("input"), function(input, i){
+      input.addEventListener("input", function(){ draftItems[i] = input.value; });
+    });
+    Array.prototype.forEach.call(itemEditList.querySelectorAll(".del-btn"), function(btn){
+      btn.addEventListener("click", function(){
+        var idx = parseInt(btn.getAttribute("data-idx"), 10);
+        if(draftItems.length <= 1){ return; }
+        draftItems.splice(idx, 1);
+        renderItemEditList();
+      });
+    });
+  }
+
+  document.getElementById("add-item-btn").addEventListener("click", function(){
+    if(draftItems.length >= 8) return;
+    draftItems.push("새 점검 항목");
+    renderItemEditList();
+  });
+
+  document.getElementById("settings-save").addEventListener("click", function(){
+    state.classSettings.roster = draftRoster.map(function(r){
+      return {
+        num: r.num,
+        gender: r.gender === "F" ? "F" : "M",
+        name: (r.name && r.name.trim()) ? r.name : defaultNameFor(r.num),
+        group: r.group
+      };
+    });
+    Object.keys(draftChecklistByPeriod).forEach(function(p){
+      var cleaned = draftChecklistByPeriod[p].filter(function(t){ return t.trim() !== ""; });
+      if(cleaned.length === 0) cleaned = DEFAULT_ITEMS.slice();
+      state.classSettings.checklistItemsByPeriod[p] = cleaned;
+    });
+    saveState();
+    settingsOverlay.hidden = true;
+    renderHeader();
+    renderCurrentView();
+  });
+  document.getElementById("settings-cancel").addEventListener("click", function(){ settingsOverlay.hidden = true; });
+  document.getElementById("settings-close").addEventListener("click", function(){ settingsOverlay.hidden = true; });
+  settingsOverlay.addEventListener("click", function(e){ if(e.target === settingsOverlay) settingsOverlay.hidden = true; });
+
+  document.getElementById("reset-btn").addEventListener("click", function(){
+    var period = state.classSettings.currentPeriod;
+    if(!confirm(boardDateKey() + " " + period + "교시의 체크 기록을 초기화할까요?")) return;
+    var key = boardDateKey();
+    if(state.records[key]) delete state.records[key][period];
+    saveState();
+    renderHeader();
+    renderCurrentView();
+    showToast(period + "교시 기록이 초기화되었습니다");
+  });
+
+  // ---------- Results viewer ----------
+  var resultsOverlay = document.getElementById("results-overlay");
+  var resultsTabDate = document.getElementById("results-tab-date");
+  var resultsTabStudent = document.getElementById("results-tab-student");
+  var resultsDateView = document.getElementById("results-date-view");
+  var resultsStudentView = document.getElementById("results-student-view");
+  var resultsDatePeriodTabsEl = document.getElementById("results-date-period-tabs");
+  var resultsDateTableEl = document.getElementById("results-date-table");
+  var resultsStudentSelect = document.getElementById("results-student-select");
+  var resultsStudentTableEl = document.getElementById("results-student-table");
+  var resultsSelectedDate = null;
+  var resultsSelectedPeriod = 1;
+  var studentFilterDate = null;
+
+  function getAllRecordDates(){
+    return Object.keys(state.records).sort().reverse();
+  }
+
+  function formatDateLabel(dateStr){
+    var parts = dateStr.split("-").map(Number);
+    var d = new Date(parts[0], parts[1]-1, parts[2]);
+    var dayNames = ["일","월","화","수","목","금","토"];
+    return "📅 " + parts[0] + "년 " + parts[1] + "월 " + parts[2] + "일 (" + dayNames[d.getDay()] + ")";
+  }
+
+  function setupDatePicker(opts){
+    var viewYear, viewMonth;
+
+    function render(){
+      var selected = opts.getSelectedDate();
+      viewMonthLabel();
+      var firstWeekday = new Date(viewYear, viewMonth, 1).getDay();
+      var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      var today = todayKey();
+
+      var html = "";
+      for(var b=0; b<firstWeekday; b++){
+        html += '<button type="button" class="calendar-day" disabled></button>';
+      }
+      for(var day=1; day<=daysInMonth; day++){
+        var m = String(viewMonth + 1).padStart(2, "0");
+        var d = String(day).padStart(2, "0");
+        var dateStr = viewYear + "-" + m + "-" + d;
+        var hasData = !!state.records[dateStr] && Object.keys(state.records[dateStr]).length > 0;
+        var classes = "calendar-day";
+        if(dateStr === today) classes += " today";
+        if(dateStr === selected) classes += " selected";
+        if(hasData) classes += " has-data";
+        html += '<button type="button" class="' + classes + '" data-date="' + dateStr + '">' + day + '</button>';
+      }
+      opts.daysEl.innerHTML = html;
+
+      Array.prototype.forEach.call(opts.daysEl.querySelectorAll(".calendar-day[data-date]"), function(btn){
+        btn.addEventListener("click", function(){
+          opts.onSelect(btn.getAttribute("data-date"));
+          opts.popupEl.hidden = true;
+        });
+      });
+    }
+
+    function viewMonthLabel(){
+      opts.monthLabelEl.textContent = viewYear + "년 " + (viewMonth + 1) + "월";
+    }
+
+    function resetViewToSelected(){
+      var selected = opts.getSelectedDate() || todayKey();
+      var parts = selected.split("-").map(Number);
+      viewYear = parts[0];
+      viewMonth = parts[1] - 1;
+    }
+
+    opts.btnEl.addEventListener("click", function(){
+      var willOpen = opts.popupEl.hidden;
+      if(willOpen){ resetViewToSelected(); render(); }
+      opts.popupEl.hidden = !willOpen;
+    });
+    opts.prevBtnEl.addEventListener("click", function(){
+      viewMonth--;
+      if(viewMonth < 0){ viewMonth = 11; viewYear--; }
+      render();
+    });
+    opts.nextBtnEl.addEventListener("click", function(){
+      viewMonth++;
+      if(viewMonth > 11){ viewMonth = 0; viewYear++; }
+      render();
+    });
+    if(opts.showAllBtnEl){
+      opts.showAllBtnEl.addEventListener("click", function(){
+        opts.onSelect(null);
+        opts.popupEl.hidden = true;
+      });
+    }
+
+    resetViewToSelected();
+    return { render: render, hide: function(){ opts.popupEl.hidden = true; } };
+  }
+
+  var resultsDateBtn = document.getElementById("results-date-btn");
+  var resultsCalendar = document.getElementById("results-calendar");
+  var dateViewPicker = setupDatePicker({
+    btnEl: resultsDateBtn,
+    popupEl: resultsCalendar,
+    monthLabelEl: document.getElementById("cal-month-label"),
+    daysEl: document.getElementById("calendar-days"),
+    prevBtnEl: document.getElementById("cal-prev-month"),
+    nextBtnEl: document.getElementById("cal-next-month"),
+    getSelectedDate: function(){ return resultsSelectedDate; },
+    onSelect: function(dateStr){
+      resultsSelectedDate = dateStr;
+      resultsDateBtn.textContent = formatDateLabel(resultsSelectedDate);
+      renderResultsDateTable();
+    }
+  });
+
+  var resultsStudentDateBtn = document.getElementById("results-student-date-btn");
+  var resultsStudentCalendar = document.getElementById("results-student-calendar");
+  var studentViewPicker = setupDatePicker({
+    btnEl: resultsStudentDateBtn,
+    popupEl: resultsStudentCalendar,
+    monthLabelEl: document.getElementById("student-cal-month-label"),
+    daysEl: document.getElementById("student-calendar-days"),
+    prevBtnEl: document.getElementById("student-cal-prev-month"),
+    nextBtnEl: document.getElementById("student-cal-next-month"),
+    showAllBtnEl: document.getElementById("student-cal-show-all"),
+    getSelectedDate: function(){ return studentFilterDate; },
+    onSelect: function(dateStr){
+      studentFilterDate = dateStr;
+      resultsStudentDateBtn.textContent = dateStr ? formatDateLabel(dateStr) : "📅 전체 날짜";
+      renderResultsStudentTable();
+    }
+  });
+
+  function openResults(){
+    settingsOverlay.hidden = true;
+
+    resultsTabDate.classList.add("active");
+    resultsTabStudent.classList.remove("active");
+    resultsDateView.hidden = false;
+    resultsStudentView.hidden = true;
+
+    resultsSelectedDate = boardDate;
+    resultsSelectedPeriod = state.classSettings.currentPeriod;
+    studentFilterDate = null;
+    resultsStudentDateBtn.textContent = "📅 전체 날짜";
+
+    resultsCalendar.hidden = true;
+    resultsStudentCalendar.hidden = true;
+    resultsDateBtn.textContent = formatDateLabel(resultsSelectedDate);
+    dateViewPicker.render();
+    renderResultsDatePeriodTabs();
+    renderResultsDateTable();
+
+    renderResultsStudentSelect();
+    renderResultsStudentTable();
+
+    resultsOverlay.hidden = false;
+  }
+
+  function renderResultsDatePeriodTabs(){
+    var html = "";
+    for(var p=1;p<=6;p++){
+      html += '<button type="button" class="item-tab' + (p === resultsSelectedPeriod ? " active" : "") +
+        '" data-period="' + p + '" style="padding:0.8vh 1.4vh; font-size:clamp(11px,1.4vh,13px);">' + p + '교시</button>';
+    }
+    resultsDatePeriodTabsEl.innerHTML = html;
+    Array.prototype.forEach.call(resultsDatePeriodTabsEl.querySelectorAll(".item-tab"), function(btn){
+      btn.addEventListener("click", function(){
+        resultsSelectedPeriod = parseInt(btn.getAttribute("data-period"), 10);
+        renderResultsDatePeriodTabs();
+        renderResultsDateTable();
+      });
+    });
+  }
+
+  function renderResultsDateTable(){
+    var day = state.records[resultsSelectedDate];
+    var periodRecs = day ? day[resultsSelectedPeriod] : null;
+    var items = getChecklistItems(resultsSelectedPeriod);
+    var numbers = getStudentNumbers();
+
+    if(!periodRecs){
+      resultsDateTableEl.innerHTML = '<div class="results-empty">해당 날짜·교시에 기록이 없습니다</div>';
+      return;
+    }
+
+    var bodyRows = numbers.map(function(num){
+      var arr = periodRecs["student_" + num];
+      if(!arr) return null;
+      var complete = arr.length > 0 && arr.every(Boolean);
+      return '<tr><td>' + num + '</td><td class="name-cell">' + escapeHtml(getStudentName(num)) + '</td>' +
+        arr.map(function(v){ return '<td>' + (v ? "O" : "X") + '</td>'; }).join("") +
+        '<td>' + (complete ? "✅" : "—") + '</td></tr>';
+    }).filter(Boolean);
+
+    if(bodyRows.length === 0){
+      resultsDateTableEl.innerHTML = '<div class="results-empty">해당 날짜·교시에 기록이 없습니다</div>';
+      return;
+    }
+
+    var head = '<tr><th>번호</th><th>이름</th>' +
+      items.map(function(_, i){ return '<th>항목' + (i+1) + '</th>'; }).join("") +
+      '<th>완료</th></tr>';
+    resultsDateTableEl.innerHTML = '<table class="results-table"><thead>' + head + '</thead><tbody>' + bodyRows.join("") + '</tbody></table>';
+  }
+
+  function renderResultsStudentSelect(){
+    var numbers = getStudentNumbers();
+    resultsStudentSelect.innerHTML = numbers.map(function(num){
+      return '<option value="' + num + '">' + num + '번 · ' + escapeHtml(getStudentName(num)) + '</option>';
+    }).join("");
+  }
+  resultsStudentSelect.addEventListener("change", renderResultsStudentTable);
+
+  function renderResultsStudentTable(){
+    var num = parseInt(resultsStudentSelect.value, 10);
+    if(!num){
+      resultsStudentTableEl.innerHTML = '<div class="results-empty">학생을 선택하세요</div>';
+      return;
+    }
+    var dates = studentFilterDate ? [studentFilterDate] : getAllRecordDates().slice().reverse();
+    var rows = [];
+    dates.forEach(function(date){
+      var day = state.records[date];
+      if(!day) return;
+      for(var p=1; p<=6; p++){
+        var periodRecs = day[p];
+        var arr = periodRecs ? periodRecs["student_" + num] : null;
+        if(!arr) continue;
+        var doneCount = arr.filter(Boolean).length;
+        var complete = doneCount === arr.length && arr.length > 0;
+        rows.push('<tr><td>' + date + '</td><td>' + p + '교시</td><td>' + doneCount + '/' + arr.length + '</td><td>' +
+          (complete ? "✅ 완료" : "미완료") + '</td></tr>');
+      }
+    });
+    if(rows.length === 0){
+      resultsStudentTableEl.innerHTML = '<div class="results-empty">기록이 없습니다</div>';
+      return;
+    }
+    resultsStudentTableEl.innerHTML = '<table class="results-table"><thead><tr><th>날짜</th><th>교시</th><th>완료 항목</th><th>상태</th></tr></thead><tbody>' +
+      rows.join("") + '</tbody></table>';
+  }
+
+  resultsTabDate.addEventListener("click", function(){
+    resultsTabDate.classList.add("active");
+    resultsTabStudent.classList.remove("active");
+    resultsDateView.hidden = false;
+    resultsStudentView.hidden = true;
+    resultsStudentCalendar.hidden = true;
+  });
+  resultsTabStudent.addEventListener("click", function(){
+    resultsTabStudent.classList.add("active");
+    resultsTabDate.classList.remove("active");
+    resultsDateView.hidden = true;
+    resultsStudentView.hidden = false;
+    resultsCalendar.hidden = true;
+    renderResultsStudentTable();
+  });
+
+  document.getElementById("results-btn").addEventListener("click", openResults);
+  document.getElementById("results-close").addEventListener("click", function(){
+    resultsOverlay.hidden = true;
+    resultsCalendar.hidden = true;
+    resultsStudentCalendar.hidden = true;
+  });
+  resultsOverlay.addEventListener("click", function(e){
+    if(e.target === resultsOverlay){
+      resultsOverlay.hidden = true;
+      resultsCalendar.hidden = true;
+      resultsStudentCalendar.hidden = true;
+      return;
+    }
+    if(!resultsCalendar.hidden && e.target !== resultsDateBtn && !resultsCalendar.contains(e.target)){
+      resultsCalendar.hidden = true;
+    }
+    if(!resultsStudentCalendar.hidden && e.target !== resultsStudentDateBtn && !resultsStudentCalendar.contains(e.target)){
+      resultsStudentCalendar.hidden = true;
+    }
+  });
+
+  document.getElementById("results-download-btn").addEventListener("click", function(){
+    var rows = [["날짜","교시","출석번호","이름","항목결과","완료여부"]];
+    var dates = getAllRecordDates().slice().reverse();
+    dates.forEach(function(date){
+      var day = state.records[date];
+      Object.keys(day).forEach(function(period){
+        var periodRecs = day[period];
+        Object.keys(periodRecs).sort(function(a,b){
+          return parseInt(a.replace("student_",""),10) - parseInt(b.replace("student_",""),10);
+        }).forEach(function(key){
+          var num = parseInt(key.replace("student_", ""), 10);
+          var arr = periodRecs[key];
+          var complete = arr.length > 0 && arr.every(Boolean);
+          rows.push([date, period, num, getStudentName(num), arr.map(function(v){ return v ? "O" : "X"; }).join(";"), complete ? "완료" : "미완료"]);
+        });
+      });
+    });
+    if(rows.length === 1){
+      showToast("다운로드할 기록이 없습니다");
+      return;
+    }
+    var csv = "﻿" + rows.map(function(r){ return r.join(","); }).join("\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "전체_자가점검_기록.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // ---------- init ----------
+  renderHeader();
+  renderGrid();
+  setInterval(renderHeader, 30000);
+
+})();
+</script>
+
+</body>
+</html>
