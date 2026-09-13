@@ -62,37 +62,37 @@
     padding: 1.4vh 2.2vh;
     display:flex; align-items:center; gap:2vh;
   }
-  .header-left{ display:flex; flex-direction:column; gap:0.6vh; min-width: 14vh; }
+  .header-left{ display:flex; flex-direction:row; align-items:center; gap:1.4vh; min-width: 14vh; }
   .header-date{
-    font-size: clamp(12px,1.6vh,18px); opacity:0.9;
-    background:none; border:none; color:#fff; font-family:inherit; padding:0; text-align:left; cursor:pointer;
+    font-size: clamp(18px,2.6vh,28px); font-weight:700; opacity:0.95;
+    background:none; border:none; color:#fff; font-family:inherit; padding:0; text-align:left; cursor:pointer; white-space:nowrap;
   }
   .header-date:active{ opacity:0.7; }
   .period-stepper{ display:flex; align-items:center; gap:0.8vh; }
   .period-stepper button{
     width: 4vh; height:4vh; min-width:36px; min-height:36px;
     border:none; border-radius:50%; background:rgba(255,255,255,0.25); color:#fff;
-    font-size: clamp(14px,2vh,20px); display:flex; align-items:center; justify-content:center;
+    font-size: clamp(16px,2.3vh,23px); display:flex; align-items:center; justify-content:center;
   }
   .period-stepper button:active{ background:rgba(255,255,255,0.4); }
-  .period-label{ font-weight:700; font-size: clamp(13px,1.8vh,18px); min-width: 6.5vh; text-align:center; }
+  .period-label{ font-weight:700; font-size: clamp(15px,2.1vh,21px); min-width: 6.5vh; text-align:center; }
 
   .header-title{
     flex:1; text-align:center;
-    font-size: clamp(18px, 3.2vh, 34px);
+    font-size: clamp(21px,3.7vh,39px);
     font-weight:800; letter-spacing:-0.5px;
   }
 
   .header-right{ display:flex; align-items:center; gap:1.6vh; min-width: 22vh; justify-content:flex-end; }
   .progress-wrap{ display:flex; flex-direction:column; align-items:flex-end; gap:0.6vh; min-width: 16vh; }
-  .progress-text{ font-size: clamp(12px,1.6vh,17px); font-weight:700; }
+  .progress-text{ font-size: clamp(14px,1.8vh,20px); font-weight:700; }
   .progress-bar{ width: 16vh; height: 1.2vh; min-height:8px; background:rgba(255,255,255,0.3); border-radius:10px; overflow:hidden; }
   .progress-fill{ height:100%; background:#fff; border-radius:10px; transition: width .4s ease; }
 
   .icon-btn{
     width:5vh; height:5vh; min-width:44px; min-height:44px;
     border-radius:50%; border:none; background:rgba(255,255,255,0.25); color:#fff;
-    font-size: clamp(18px,2.4vh,24px); display:flex; align-items:center; justify-content:center;
+    font-size: clamp(21px,2.8vh,28px); display:flex; align-items:center; justify-content:center;
   }
   .icon-btn:active{ background:rgba(255,255,255,0.4); }
 
@@ -104,17 +104,30 @@
   .mode-tab{
     flex:1; padding: 1.4vh; border-radius: 14px; border: none;
     background: var(--tile-bg); color: var(--text-sub); font-weight:700;
-    font-size: clamp(13px,1.8vh,18px);
+    font-size: clamp(15px,2.1vh,21px);
     border: 2px solid transparent;
+    transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease, filter .2s ease;
   }
   .mode-tab.active{ background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .mode-tab[data-mode="A"].active{ background:#e7effe; color:#3568d4; border-color:#4f86f7; }
+  .mode-tab[data-mode="C"].active{ background:#f1ebfe; color:#7c3aed; border-color:#8b5cf6; }
+  .mode-tab[data-mode="B"].active{ background:#fff3e0; color:#c2760a; border-color:#f59e0b; }
+  .mode-tab:active{ filter: brightness(0.93); transform: scale(0.97); }
+  @keyframes tabTapFlash{ 0%{ filter: brightness(1.5); } 100%{ filter: brightness(1); } }
+  .mode-tab.tap-flash{ animation: tabTapFlash .4s ease; }
 
   /* ---------- Main ---------- */
   #main{
     flex:1; overflow-y:auto; padding: 2vh 2.2vh;
     display:flex; flex-direction:column; justify-content:flex-end;
+    background: var(--board-bg);
+    transition: background .3s ease;
   }
+  #main.theme-a{ background:#f3f7ff; }
+  #main.theme-c{ background:#f8f5ff; }
+  #main.theme-b{ background:#fffaf2; }
   #student-grid, #group-view, #batch-view{ width:100%; }
+  #group-view{ margin-top:auto; margin-bottom:auto; }
 
   /* Mode A grid */
   #student-grid{
@@ -129,29 +142,29 @@
   }
   .status-section-title{
     display:flex; align-items:center; gap:0.8vh;
-    font-size: clamp(12px,1.6vh,15px); font-weight:800; color: var(--text-sub);
+    font-size: clamp(14px,1.8vh,17px); font-weight:800; color: var(--text-sub);
   }
   .status-section-title .count-badge{
     background: var(--tile-border); color: var(--text-main);
-    border-radius:999px; padding: 0.3vh 1.2vh; font-size: clamp(10px,1.3vh,12px); font-weight:800;
+    border-radius:999px; padding: 0.3vh 1.2vh; font-size: clamp(12px,1.5vh,14px); font-weight:800;
   }
   .done-section .status-section-title .count-badge{ background: var(--success-soft); color:#16803c; }
   .status-tiles{ display:flex; flex-wrap:wrap; justify-content:center; gap: 1.4vh; }
-  .status-empty{ width:100%; text-align:center; color: var(--text-sub); font-size: clamp(11px,1.5vh,14px); padding: 0.6vh 0; }
+  .status-empty{ width:100%; text-align:center; color: var(--text-sub); font-size: clamp(13px,1.7vh,16px); padding: 0.6vh 0; }
 
   /* ---------- Results viewer ---------- */
-  .results-table{ width:100%; border-collapse:collapse; font-size: clamp(11px,1.5vh,14px); }
+  .results-table{ width:100%; border-collapse:collapse; font-size: clamp(13px,1.7vh,16px); }
   .results-table th, .results-table td{
     padding: 0.9vh 1vh; border-bottom:1px solid var(--tile-border); text-align:center; white-space:nowrap;
   }
   .results-table th{ color: var(--text-sub); font-weight:800; background: var(--tile-bg); position:sticky; top:0; }
   .results-table td.name-cell{ text-align:left; font-weight:700; }
-  .results-empty{ text-align:center; color: var(--text-sub); padding: 3vh 0; font-size: clamp(12px,1.6vh,14px); }
+  .results-empty{ text-align:center; color: var(--text-sub); padding: 3vh 0; font-size: clamp(14px,1.8vh,16px); }
 
   .date-picker-wrap{ position:relative; margin-bottom:1.2vh; }
   .date-picker-btn{
     width:100%; padding:1.1vh 1.2vh; border-radius:10px; border:2px solid var(--tile-border);
-    background:#fff; font-family:inherit; font-size: clamp(13px,1.7vh,16px); font-weight:700;
+    background:#fff; font-family:inherit; font-size: clamp(15px,2vh,18px); font-weight:700;
     color: var(--text-main); text-align:left;
   }
   .calendar-popup{
@@ -162,17 +175,17 @@
   .calendar-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1vh; }
   .calendar-header button{
     width:3.6vh; height:3.6vh; min-width:32px; min-height:32px; border-radius:50%;
-    border:none; background: var(--tile-bg); font-size: clamp(14px,1.8vh,18px); color: var(--text-main);
+    border:none; background: var(--tile-bg); font-size: clamp(16px,2.1vh,21px); color: var(--text-main);
   }
-  #cal-month-label{ font-weight:800; font-size: clamp(13px,1.7vh,16px); }
+  #cal-month-label{ font-weight:800; font-size: clamp(15px,2vh,18px); }
   .calendar-weekdays{
     display:grid; grid-template-columns: repeat(7,1fr); text-align:center;
-    color: var(--text-sub); font-size: clamp(10px,1.3vh,12px); font-weight:700; margin-bottom:0.4vh;
+    color: var(--text-sub); font-size: clamp(12px,1.5vh,14px); font-weight:700; margin-bottom:0.4vh;
   }
   .calendar-days{ display:grid; grid-template-columns: repeat(7,1fr); gap:0.3vh; }
   .calendar-day{
     aspect-ratio:1; display:flex; align-items:center; justify-content:center; position:relative;
-    border-radius:8px; border:none; background:transparent; font-size: clamp(11px,1.5vh,14px); color: var(--text-main);
+    border-radius:8px; border:none; background:transparent; font-size: clamp(13px,1.7vh,16px); color: var(--text-main);
   }
   .calendar-day[disabled]{ visibility:hidden; }
   .calendar-day.today{ font-weight:800; color: var(--accent); }
@@ -184,24 +197,24 @@
   .calendar-day.selected.has-data::after{ background:#fff; }
   .calendar-show-all{
     width:100%; padding:0.8vh; margin-bottom:1vh; border-radius:8px; border:2px solid var(--tile-border);
-    background: var(--tile-bg); font-family:inherit; font-size: clamp(11px,1.4vh,13px); font-weight:700; color: var(--text-main);
+    background: var(--tile-bg); font-family:inherit; font-size: clamp(13px,1.6vh,15px); font-weight:700; color: var(--text-main);
   }
   .student-tile{
-    flex: 0 0 11vh;
-    aspect-ratio: 1 / 0.85;
-    min-height:64px;
+    flex: 0 0 12.5vh;
+    aspect-ratio: 1 / 0.9;
+    min-height:76px;
     border-radius: 16px;
     background: var(--tile-bg);
     border: 2px solid var(--tile-border);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap: 0.4vh;
+    gap: 0.5vh;
     position:relative;
     transition: transform .15s ease, background .25s ease, border-color .25s ease;
   }
   .student-tile:active{ transform: scale(0.94); }
-  .student-tile .num{ font-size: clamp(16px,2.6vh,28px); font-weight:800; color: var(--text-main); }
+  .student-tile .num{ font-size: clamp(12px,1.6vh,18px); font-weight:700; color: var(--text-sub); }
   .student-tile .sub{
-    font-size: clamp(9px,1.2vh,12px); color: var(--text-sub);
+    font-size: clamp(16px,2.6vh,26px); font-weight:800; color: var(--text-main);
     max-width: 92%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .student-tile.gender-m{ background:#eaf1ff; border-color:#bcd4fb; }
@@ -213,24 +226,42 @@
     background: var(--success-soft); border-color: var(--success);
   }
   .student-tile.complete .num{ color: #16803c; }
+  .student-tile.complete .sub{ color: #16803c; }
   .student-tile.complete::after{
     content:"✓";
     position:absolute; top:0.6vh; right:0.8vh;
     color:#fff; background: var(--success);
-    width:2.4vh; height:2.4vh; min-width:20px; min-height:20px;
+    width:2.6vh; height:2.6vh; min-width:22px; min-height:22px;
     border-radius:50%; display:flex; align-items:center; justify-content:center;
-    font-size: clamp(11px,1.4vh,14px); font-weight:800;
+    font-size: clamp(15px,1.8vh,18px); font-weight:800;
   }
+  .tile-dots{ display:flex; gap:0.4vh; }
+  .tile-dot{
+    width:1vh; height:1vh; min-width:7px; min-height:7px; border-radius:50%;
+    background: var(--tile-border);
+  }
+  .tile-dot.on{ background: var(--success); }
 
   /* Mode B batch */
   #item-tabs{ display:flex; flex-wrap:wrap; gap:1vh; margin-bottom:2vh; }
   .item-tab{
     padding: 1.2vh 1.8vh; border-radius: 12px; border:2px solid var(--tile-border);
     background:#fff; color: var(--text-main); font-weight:700;
-    font-size: clamp(12px,1.6vh,16px);
+    font-size: clamp(14px,1.8vh,18px);
+    transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease, filter .2s ease;
   }
   .item-tab.active{ background: var(--accent); border-color: var(--accent); color:#fff; }
-  #item-progress{ margin-bottom:1.6vh; font-size: clamp(12px,1.6vh,16px); color: var(--text-sub); font-weight:600; }
+  .item-tab:active{ filter: brightness(0.93); transform: scale(0.97); }
+  .item-tab.tap-flash{ animation: tabTapFlash .4s ease; }
+  .batch-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:1.2vh; flex-wrap:wrap; margin-bottom:1.6vh; }
+  #item-progress{ font-size: clamp(14px,1.8vh,18px); color: var(--text-sub); font-weight:600; }
+  .batch-check-all-btn{
+    padding: 1vh 1.8vh; border-radius:12px; border:2px solid #f5c26b;
+    background:#fff3e0; color:#c2760a; font-weight:800;
+    font-size: clamp(13px,1.7vh,17px); white-space:nowrap;
+    transition: filter .15s ease, transform .15s ease;
+  }
+  .batch-check-all-btn:active{ filter: brightness(0.92); transform: scale(0.97); }
 
   #batch-grid{
     display:flex; flex-wrap:wrap;
@@ -238,11 +269,11 @@
     gap: 1.2vh;
   }
   .batch-tile{
-    flex: 0 0 10vh;
-    aspect-ratio: 1/0.8; min-height:60px;
+    flex: 0 0 11.5vh;
+    aspect-ratio: 1/0.8; min-height:68px;
     border-radius:14px; background: var(--tile-bg); border:2px solid var(--tile-border);
     display:flex; align-items:center; justify-content:center;
-    font-size: clamp(15px,2.2vh,24px); font-weight:800; color:var(--text-main);
+    font-size: clamp(17px,2.5vh,28px); font-weight:800; color:var(--text-main);
     transition: transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
   }
   .batch-tile:active{ transform: scale(0.94); }
@@ -253,13 +284,12 @@
 
   /* Mode C: group seating chart */
   #group-grid{
-    display:flex; flex-wrap:wrap;
-    justify-content:center; align-content:flex-end;
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 34vh));
+    justify-content:center;
     gap: 2.2vh;
   }
   .group-box{
-    flex: 1 1 24vh;
-    max-width: 34vh;
     background: var(--accent-soft);
     border: 2px solid #cddbfa;
     border-radius: 18px;
@@ -268,13 +298,13 @@
   }
   .group-box.complete{ background: var(--success-soft); border-color: var(--success); }
   .group-box-label{
-    font-weight:800; color: var(--accent); font-size: clamp(13px,1.7vh,17px);
+    font-weight:800; color: var(--accent); font-size: clamp(15px,2vh,20px);
     margin-bottom: 1.2vh; text-align:center;
     display:flex; align-items:center; justify-content:center; gap:0.8vh;
   }
   .group-box.complete .group-box-label{ color: #16803c; }
   .group-complete-badge{
-    font-size: clamp(9px,1.2vh,11px); background: var(--success); color:#fff;
+    font-size: clamp(10px,1.4vh,13px); background: var(--success); color:#fff;
     padding: 0.3vh 0.9vh; border-radius:999px; font-weight:800;
   }
   .group-seats{
@@ -282,7 +312,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1vh;
   }
-  .group-seats .student-tile{ aspect-ratio: 1/0.75; min-height:56px; }
+  .group-seats .student-tile{ aspect-ratio: 1/0.8; min-height:66px; }
 
   /* ---------- Overlay / Modal ---------- */
   .overlay{
@@ -302,14 +332,14 @@
     position:absolute; top:1.6vh; right:1.6vh;
     width:4vh; height:4vh; min-width:36px; min-height:36px; border-radius:50%;
     border:none; background: var(--tile-bg); color: var(--text-sub);
-    font-size: clamp(16px,2vh,20px); display:flex; align-items:center; justify-content:center;
+    font-size: clamp(18px,2.3vh,23px); display:flex; align-items:center; justify-content:center;
   }
 
   .student-modal-num{
-    text-align:center; font-size: clamp(28px,4.6vh,48px); font-weight:900; color: var(--accent);
+    text-align:center; font-size: clamp(32px,5.3vh,55px); font-weight:900; color: var(--accent);
     margin-bottom:0.4vh;
   }
-  .student-modal-sub{ text-align:center; color: var(--text-sub); font-size: clamp(12px,1.6vh,15px); margin-bottom:2.4vh; }
+  .student-modal-sub{ text-align:center; color: var(--text-sub); font-size: clamp(14px,1.8vh,17px); margin-bottom:2.4vh; }
 
   .check-row{
     display:flex; align-items:center; gap: 1.6vh;
@@ -322,42 +352,42 @@
     flex:0 0 auto; width: 5.2vh; height:5.2vh; min-width:48px; min-height:48px;
     border-radius:12px; border:2px solid var(--tile-border); background:#fff;
     display:flex; align-items:center; justify-content:center;
-    font-size: clamp(20px,2.8vh,28px); color:#fff; font-weight:800;
+    font-size: clamp(23px,3.2vh,32px); color:#fff; font-weight:800;
   }
   .check-row.checked .check-box{ background: var(--success); border-color: var(--success); }
-  .check-label{ flex:1; font-size: clamp(14px,1.9vh,18px); font-weight:600; line-height:1.4; }
+  .check-label{ flex:1; font-size: clamp(16px,2.2vh,21px); font-weight:600; line-height:1.4; }
   .check-row.bounce{ animation: bounce .3s ease; }
   @keyframes bounce{ 0%{ transform:scale(1);} 40%{ transform:scale(1.04);} 100%{ transform:scale(1);} }
 
   /* ---------- Teacher gate (passcode) ---------- */
-  .gate-title{ text-align:center; font-weight:800; font-size: clamp(16px,2.2vh,22px); margin-bottom:1.6vh; }
+  .gate-title{ text-align:center; font-weight:800; font-size: clamp(18px,2.5vh,25px); margin-bottom:1.6vh; }
   .gate-dots{ display:flex; justify-content:center; gap:1.6vh; margin-bottom:2.4vh; }
   .gate-dot{
     width:2.2vh; height:2.2vh; min-width:16px; min-height:16px; border-radius:50%;
     background: var(--tile-border);
   }
   .gate-dot.filled{ background: var(--accent); }
-  .gate-error{ text-align:center; color: var(--danger); font-size: clamp(12px,1.5vh,14px); min-height:2.4vh; margin-bottom:0.6vh; font-weight:700; }
+  .gate-error{ text-align:center; color: var(--danger); font-size: clamp(14px,1.7vh,16px); min-height:2.4vh; margin-bottom:0.6vh; font-weight:700; }
   .numpad{ display:grid; grid-template-columns: repeat(3,1fr); gap: 1.2vh; }
   .numpad button{
     padding: 2vh 0; border-radius:14px; border:2px solid var(--tile-border); background: var(--tile-bg);
-    font-size: clamp(18px,2.6vh,26px); font-weight:700; color: var(--text-main);
+    font-size: clamp(21px,3vh,30px); font-weight:700; color: var(--text-main);
   }
   .numpad button:active{ background: var(--accent-soft); }
 
   /* ---------- Settings ---------- */
   .settings-section{ margin-bottom: 2.6vh; }
-  .settings-label{ font-weight:800; font-size: clamp(14px,1.9vh,18px); margin-bottom:1.2vh; }
+  .settings-label{ font-weight:800; font-size: clamp(16px,2.2vh,21px); margin-bottom:1.2vh; }
   .stepper-row{ display:flex; align-items:center; gap:1.6vh; }
   .stepper-row button{
     width:5.2vh; height:5.2vh; min-width:44px; min-height:44px; border-radius:12px;
-    border:2px solid var(--tile-border); background: var(--tile-bg); font-size: clamp(20px,2.6vh,26px); font-weight:800;
+    border:2px solid var(--tile-border); background: var(--tile-bg); font-size: clamp(23px,3vh,30px); font-weight:800;
   }
-  .stepper-value{ font-size: clamp(20px,2.8vh,28px); font-weight:800; min-width: 6vh; text-align:center; }
+  .stepper-value{ font-size: clamp(23px,3.2vh,32px); font-weight:800; min-width: 6vh; text-align:center; }
 
   .roster-header{
     display:flex; align-items:center; gap:1vh; padding: 0 1.2vh; margin-bottom:0.6vh;
-    color: var(--text-sub); font-size: clamp(10px,1.3vh,12px); font-weight:700;
+    color: var(--text-sub); font-size: clamp(12px,1.5vh,14px); font-weight:700;
   }
   .roster-header span:nth-child(1){ flex:0 0 6.2vh; }
   .roster-header span:nth-child(2){ flex:0 0 10.4vh; }
@@ -370,41 +400,41 @@
   }
   .roster-num-input{
     flex:0 0 6.2vh; width:6.2vh; padding:0.8vh; border-radius:8px; border:2px solid var(--tile-border);
-    text-align:center; font-size: clamp(12px,1.6vh,15px); font-family:inherit; font-weight:800;
+    text-align:center; font-size: clamp(14px,1.8vh,17px); font-family:inherit; font-weight:800;
   }
   .roster-gender-toggle{ flex:0 0 10.4vh; display:flex; gap:0.5vh; }
   .gender-btn{
     flex:1; padding: 0.8vh 0; border-radius:8px; border:2px solid var(--tile-border);
-    background:#fff; color: var(--text-sub); font-size: clamp(11px,1.4vh,13px); font-weight:700;
+    background:#fff; color: var(--text-sub); font-size: clamp(13px,1.6vh,15px); font-weight:700;
   }
   .gender-btn[data-gender="M"].active{ background:#4f86f7; border-color:#4f86f7; color:#fff; }
   .gender-btn[data-gender="F"].active{ background:#ec4899; border-color:#ec4899; color:#fff; }
   .roster-name-input{
     flex:1; min-width: 10vh; padding: 0.9vh 1vh; border-radius:10px; border:2px solid var(--tile-border);
-    font-size: clamp(12px,1.6vh,15px); font-family:inherit;
+    font-size: clamp(14px,1.8vh,17px); font-family:inherit;
   }
   .roster-group-input{
     flex:0 0 11vh; width:11vh; padding:0.8vh; border-radius:8px; border:2px solid var(--tile-border);
-    text-align:center; font-size: clamp(12px,1.6vh,15px); font-family:inherit;
+    text-align:center; font-size: clamp(14px,1.8vh,17px); font-family:inherit;
   }
 
   .item-edit-row{ display:flex; align-items:center; gap:1vh; margin-bottom:1vh; }
   .item-edit-row input{
     flex:1; padding: 1.4vh; border-radius:12px; border:2px solid var(--tile-border);
-    font-size: clamp(13px,1.7vh,16px); font-family:inherit;
+    font-size: clamp(15px,2vh,18px); font-family:inherit;
   }
   .item-edit-row .del-btn{
     flex:0 0 auto; width:4.6vh; height:4.6vh; min-width:40px; min-height:40px; border-radius:10px;
-    border:none; background:#fde8e8; color: var(--danger); font-size: clamp(16px,2vh,20px); font-weight:800;
+    border:none; background:#fde8e8; color: var(--danger); font-size: clamp(18px,2.3vh,23px); font-weight:800;
   }
   .add-item-btn{
     width:100%; padding:1.4vh; border-radius:12px; border:2px dashed var(--tile-border);
-    background:#fff; color: var(--accent); font-weight:700; font-size: clamp(13px,1.7vh,16px);
+    background:#fff; color: var(--accent); font-weight:700; font-size: clamp(15px,2vh,18px);
   }
 
   .btn{
     padding: 1.6vh; border-radius:14px; border:none; font-weight:800;
-    font-size: clamp(14px,1.9vh,18px); width:100%;
+    font-size: clamp(16px,2.2vh,21px); width:100%;
   }
   .btn-primary{ background: var(--accent); color:#fff; }
   .btn-secondary{ background: var(--tile-bg); color: var(--text-main); }
@@ -416,7 +446,7 @@
   #toast{
     position:absolute; left:50%; bottom:4vh; transform: translateX(-50%) translateY(20px);
     background: rgba(20,26,46,0.92); color:#fff; padding: 1.8vh 3vh; border-radius: 999px;
-    font-size: clamp(14px,2vh,20px); font-weight:700; opacity:0; pointer-events:none;
+    font-size: clamp(16px,2.3vh,23px); font-weight:700; opacity:0; pointer-events:none;
     transition: opacity .25s ease, transform .25s ease;
     z-index: 100; white-space:nowrap;
   }
@@ -465,12 +495,12 @@
     </div>
 
     <div id="mode-tabs">
-      <button class="mode-tab active" data-mode="A" id="tab-mode-a">번호판 모드</button>
-      <button class="mode-tab" data-mode="C" id="tab-mode-c">모둠 자리 배치도</button>
-      <button class="mode-tab" data-mode="B" id="tab-mode-b">항목별 일괄 체크</button>
+      <button class="mode-tab active" data-mode="A" id="tab-mode-a">번호별 보기</button>
+      <button class="mode-tab" data-mode="C" id="tab-mode-c">모둠별 보기</button>
+      <button class="mode-tab" data-mode="B" id="tab-mode-b">항목별 보기</button>
     </div>
 
-    <div id="main">
+    <div id="main" class="theme-a">
       <div id="student-grid"></div>
 
       <div id="group-view" hidden>
@@ -479,7 +509,10 @@
 
       <div id="batch-view" hidden>
         <div id="item-tabs"></div>
-        <div id="item-progress"></div>
+        <div class="batch-toolbar">
+          <div id="item-progress"></div>
+          <button type="button" id="batch-check-all-btn" class="batch-check-all-btn">✅ 전체 일괄 체크</button>
+        </div>
         <div id="batch-grid"></div>
       </div>
     </div>
@@ -513,7 +546,7 @@
 
         <div class="settings-section">
           <div class="settings-label">학생 명단 (번호 · 성별 · 이름 · 모둠)</div>
-          <div style="color:var(--text-sub); font-size: clamp(11px,1.4vh,13px); margin-bottom:1vh;">
+          <div style="color:var(--text-sub); font-size: clamp(13px,1.6vh,15px); margin-bottom:1vh;">
             번호, 성별, 이름, 모둠을 직접 입력하거나 수정하세요. 이름은 테스트용 예시가 자동으로 채워져 있어요.
           </div>
           <div class="roster-header">
@@ -576,7 +609,7 @@
         </div>
 
         <div id="results-student-view" hidden>
-          <select id="results-student-select" style="width:100%; padding:1vh; border-radius:10px; border:2px solid var(--tile-border); font-family:inherit; font-size:clamp(12px,1.6vh,15px); margin-bottom:1.2vh;"></select>
+          <select id="results-student-select" style="width:100%; padding:1vh; border-radius:10px; border:2px solid var(--tile-border); font-family:inherit; font-size:clamp(14px,1.8vh,17px); margin-bottom:1.2vh;"></select>
           <div class="date-picker-wrap">
             <button type="button" id="results-student-date-btn" class="date-picker-btn">📅 전체 날짜</button>
             <div id="results-student-calendar" class="calendar-popup" hidden>
@@ -721,6 +754,63 @@
     return arr.length > 0 && arr.every(Boolean);
   }
 
+  function recordCompletionOrder(studentNum){
+    var key = boardDateKey();
+    var period = state.classSettings.currentPeriod;
+    if(!state.records[key]) state.records[key] = {};
+    if(!state.records[key][period]) state.records[key][period] = {};
+    var periodRecs = state.records[key][period];
+    if(!periodRecs._order) periodRecs._order = {};
+    periodRecs._seq = (periodRecs._seq || 0) + 1;
+    periodRecs._order[studentNum] = periodRecs._seq;
+    saveState();
+  }
+
+  function getCompletionOrder(studentNum){
+    var key = boardDateKey();
+    var period = state.classSettings.currentPeriod;
+    var periodRecs = state.records[key] ? state.records[key][period] : null;
+    return (periodRecs && periodRecs._order) ? (periodRecs._order[studentNum] || 0) : 0;
+  }
+
+  function getGroupCompletionOrder(gid){
+    var key = boardDateKey();
+    var period = state.classSettings.currentPeriod;
+    var periodRecs = state.records[key] ? state.records[key][period] : null;
+    return (periodRecs && periodRecs._groupOrder) ? (periodRecs._groupOrder[gid] || 0) : 0;
+  }
+
+  function ensureGroupCompletionOrder(gid){
+    var key = boardDateKey();
+    var period = state.classSettings.currentPeriod;
+    if(!state.records[key]) state.records[key] = {};
+    if(!state.records[key][period]) state.records[key][period] = {};
+    var periodRecs = state.records[key][period];
+    if(!periodRecs._groupOrder) periodRecs._groupOrder = {};
+    if(periodRecs._groupOrder[gid]) return;
+    periodRecs._groupSeq = (periodRecs._groupSeq || 0) + 1;
+    periodRecs._groupOrder[gid] = periodRecs._groupSeq;
+    saveState();
+  }
+
+  function checkGroupCompletionFor(num){
+    var gid = getStudentGroupId(num);
+    var members = getStudentNumbers().filter(function(n){ return getStudentGroupId(n) === gid; });
+    var allDone = members.length > 0 && members.every(function(n){ return isComplete(n); });
+    if(allDone) ensureGroupCompletionOrder(gid);
+  }
+
+  function backfillCompletionOrder(numbers){
+    var key = boardDateKey();
+    var period = state.classSettings.currentPeriod;
+    var periodRecs = state.records[key] ? state.records[key][period] : null;
+    if(!periodRecs) return;
+    var missing = numbers.filter(function(n){
+      return isComplete(n) && !(periodRecs._order && periodRecs._order[n]);
+    }).sort(function(a,b){ return a-b; });
+    missing.forEach(function(n){ recordCompletionOrder(n); });
+  }
+
   function findRosterEntry(num){
     var roster = state.classSettings.roster;
     for(var i=0;i<roster.length;i++){ if(roster[i].num === num) return roster[i]; }
@@ -835,6 +925,7 @@
 
   // ---------- mode tabs ----------
   var currentMode = "A";
+  var mainEl = document.getElementById("main");
   var gridEl = document.getElementById("student-grid");
   var groupViewEl = document.getElementById("group-view");
   var batchViewEl = document.getElementById("batch-view");
@@ -856,25 +947,39 @@
     gridEl.hidden = mode !== "A";
     groupViewEl.hidden = mode !== "C";
     batchViewEl.hidden = mode !== "B";
+    mainEl.classList.remove("theme-a", "theme-c", "theme-b");
+    mainEl.classList.add("theme-" + mode.toLowerCase());
     renderCurrentView();
   }
-  tabA.addEventListener("click", function(){ setMode("A"); });
-  tabC.addEventListener("click", function(){ setMode("C"); });
-  tabB.addEventListener("click", function(){ setMode("B"); });
+  function flashTap(el){
+    el.classList.remove("tap-flash");
+    void el.offsetWidth;
+    el.classList.add("tap-flash");
+  }
+
+  tabA.addEventListener("click", function(){ flashTap(tabA); setMode("A"); });
+  tabC.addEventListener("click", function(){ flashTap(tabC); setMode("C"); });
+  tabB.addEventListener("click", function(){ flashTap(tabB); setMode("B"); });
 
   // ---------- Mode A: student grid ----------
   function studentTileHtml(num, complete){
     var genderClass = getStudentGender(num) === "F" ? "gender-f" : "gender-m";
+    var arr = getRecord(num);
+    var dotsHtml = (!complete && arr.length > 1) ?
+      '<div class="tile-dots">' + arr.map(function(v){ return '<span class="tile-dot' + (v ? " on" : "") + '"></span>'; }).join("") + '</div>' : "";
     return '<button class="student-tile ' + genderClass + (complete ? " complete" : "") + '" data-num="' + num + '">' +
              '<div class="num">' + num + '</div>' +
              '<div class="sub">' + escapeHtml(getStudentName(num)) + '</div>' +
+             dotsHtml +
            '</button>';
   }
 
   function renderGrid(){
     var numbers = getStudentNumbers();
+    backfillCompletionOrder(numbers);
     var done = [], pending = [];
     numbers.forEach(function(n){ (isComplete(n) ? done : pending).push(n); });
+    done.sort(function(a,b){ return getCompletionOrder(a) - getCompletionOrder(b); });
 
     var html = "";
     html += '<div class="status-section done-section">' +
@@ -901,8 +1006,22 @@
   // ---------- Mode C: group seating chart ----------
   var groupGridEl = document.getElementById("group-grid");
 
+  function computeGroupColumns(n){
+    if(n <= 1) return n || 1;
+    var vhPx = window.innerHeight / 100;
+    var gapPx = 2.2 * vhPx;
+    var minBoxPx = 24 * vhPx;
+    var containerPx = groupGridEl.clientWidth || (34 * vhPx * n);
+    var naturalCols = Math.max(1, Math.floor((containerPx + gapPx) / (minBoxPx + gapPx)));
+    naturalCols = Math.min(naturalCols, n);
+
+    var rows = Math.ceil(n / naturalCols);
+    return Math.ceil(n / rows);
+  }
+
   function renderGroups(){
     var numbers = getStudentNumbers();
+    backfillCompletionOrder(numbers);
     var groups = {};
     numbers.forEach(function(num, idx){
       var gid = getStudentGroupId(num);
@@ -910,11 +1029,34 @@
       groups[gid].push(num);
     });
     var groupIds = Object.keys(groups).map(Number).sort(function(a,b){ return a-b; });
+    groupGridEl.style.gridTemplateColumns = "repeat(" + computeGroupColumns(groupIds.length) + ", minmax(0, 34vh))";
 
-    var html = "";
+    var groupDone = {};
     groupIds.forEach(function(gid){
       var members = groups[gid];
       var allDone = members.length > 0 && members.every(function(num){ return isComplete(num); });
+      groupDone[gid] = allDone;
+      if(allDone) ensureGroupCompletionOrder(gid);
+    });
+
+    var orderedGroupIds = groupIds.slice().sort(function(a, b){
+      var aDone = groupDone[a], bDone = groupDone[b];
+      if(aDone && !bDone) return -1;
+      if(!aDone && bDone) return 1;
+      if(aDone && bDone) return getGroupCompletionOrder(a) - getGroupCompletionOrder(b);
+      return 0;
+    });
+
+    var html = "";
+    orderedGroupIds.forEach(function(gid){
+      var members = groups[gid].slice().sort(function(a, b){
+        var aDone = isComplete(a), bDone = isComplete(b);
+        if(aDone && !bDone) return -1;
+        if(!aDone && bDone) return 1;
+        if(aDone && bDone) return getCompletionOrder(a) - getCompletionOrder(b);
+        return 0;
+      });
+      var allDone = groupDone[gid];
       html += '<div class="group-box' + (allDone ? " complete" : "") + '">' +
                 '<div class="group-box-label">' + gid + '모둠' +
                   (allDone ? '<span class="group-complete-badge">✅ 완료</span>' : '') +
@@ -991,10 +1133,12 @@
 
     var nowComplete = arr.every(Boolean);
     if(nowComplete && !wasComplete){
-      showToast("🎉 " + num + "번 점검 완료!", 2600);
+      recordCompletionOrder(num);
+      checkGroupCompletionFor(num);
+      showToast("🎉 " + num + "번 점검 완료!", 2000);
       if(studentOverlay.hidden === false && currentStudent === num){
         clearTimeout(autoCloseTimer);
-        autoCloseTimer = setTimeout(closeStudentModal, 3000);
+        autoCloseTimer = setTimeout(closeStudentModal, 900);
       }
     }
     if(currentMode === "B") renderBatch();
@@ -1016,7 +1160,7 @@
     if(currentItemIdx >= items.length) currentItemIdx = 0;
 
     itemTabsEl.innerHTML = items.map(function(label, i){
-      return '<button class="item-tab' + (i === currentItemIdx ? " active" : "") + '" data-idx="' + i + '">항목 ' + (i+1) + '</button>';
+      return '<button class="item-tab' + (i === currentItemIdx ? " active tap-flash" : "") + '" data-idx="' + i + '">항목 ' + (i+1) + '</button>';
     }).join("");
     Array.prototype.forEach.call(itemTabsEl.querySelectorAll(".item-tab"), function(btn){
       btn.addEventListener("click", function(){
@@ -1048,6 +1192,27 @@
       });
     });
   }
+
+  document.getElementById("batch-check-all-btn").addEventListener("click", function(){
+    var items = getChecklistItems(state.classSettings.currentPeriod);
+    var itemLabel = items[currentItemIdx] || ("항목 " + (currentItemIdx + 1));
+    var ok = confirm("⚠ 선생님 확인이 필요합니다.\n\n「" + itemLabel + "」 항목을 전체 학생 일괄 체크 처리할까요?");
+    if(!ok) return;
+    var numbers = getStudentNumbers();
+    numbers.forEach(function(num){
+      var arr = getRecord(num);
+      var wasComplete = arr.every(Boolean);
+      arr[currentItemIdx] = true;
+      setRecord(num, arr);
+      if(arr.every(Boolean) && !wasComplete){
+        recordCompletionOrder(num);
+        checkGroupCompletionFor(num);
+      }
+    });
+    renderHeader();
+    renderBatch();
+    showToast("전체 학생을 일괄 체크했습니다");
+  });
 
   // ---------- Teacher gate ----------
   var gateOverlay = document.getElementById("gate-overlay");
@@ -1190,8 +1355,8 @@
   function renderItemPeriodTabs(){
     var html = "";
     for(var p=1;p<=6;p++){
-      html += '<button type="button" class="item-tab' + (p === draftItemsPeriod ? " active" : "") +
-        '" data-period="' + p + '" style="padding:0.8vh 1.4vh; font-size:clamp(11px,1.4vh,13px);">' + p + '교시</button>';
+      html += '<button type="button" class="item-tab' + (p === draftItemsPeriod ? " active tap-flash" : "") +
+        '" data-period="' + p + '" style="padding:0.8vh 1.4vh; font-size:clamp(13px,1.6vh,15px);">' + p + '교시</button>';
     }
     itemPeriodTabsEl.innerHTML = html;
     Array.prototype.forEach.call(itemPeriodTabsEl.querySelectorAll(".item-tab"), function(btn){
@@ -1423,8 +1588,8 @@
   function renderResultsDatePeriodTabs(){
     var html = "";
     for(var p=1;p<=6;p++){
-      html += '<button type="button" class="item-tab' + (p === resultsSelectedPeriod ? " active" : "") +
-        '" data-period="' + p + '" style="padding:0.8vh 1.4vh; font-size:clamp(11px,1.4vh,13px);">' + p + '교시</button>';
+      html += '<button type="button" class="item-tab' + (p === resultsSelectedPeriod ? " active tap-flash" : "") +
+        '" data-period="' + p + '" style="padding:0.8vh 1.4vh; font-size:clamp(13px,1.6vh,15px);">' + p + '교시</button>';
     }
     resultsDatePeriodTabsEl.innerHTML = html;
     Array.prototype.forEach.call(resultsDatePeriodTabsEl.querySelectorAll(".item-tab"), function(btn){
@@ -1505,6 +1670,7 @@
   }
 
   resultsTabDate.addEventListener("click", function(){
+    flashTap(resultsTabDate);
     resultsTabDate.classList.add("active");
     resultsTabStudent.classList.remove("active");
     resultsDateView.hidden = false;
@@ -1512,6 +1678,7 @@
     resultsStudentCalendar.hidden = true;
   });
   resultsTabStudent.addEventListener("click", function(){
+    flashTap(resultsTabStudent);
     resultsTabStudent.classList.add("active");
     resultsTabDate.classList.remove("active");
     resultsDateView.hidden = true;
@@ -1548,7 +1715,9 @@
       var day = state.records[date];
       Object.keys(day).forEach(function(period){
         var periodRecs = day[period];
-        Object.keys(periodRecs).sort(function(a,b){
+        Object.keys(periodRecs).filter(function(key){
+          return key.indexOf("student_") === 0;
+        }).sort(function(a,b){
           return parseInt(a.replace("student_",""),10) - parseInt(b.replace("student_",""),10);
         }).forEach(function(key){
           var num = parseInt(key.replace("student_", ""), 10);
